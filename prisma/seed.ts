@@ -6,19 +6,17 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Starting seed...')
 
-  // Clean database
-  await prisma.notification.deleteMany()
-  await prisma.analytics.deleteMany()
-  await prisma.event.deleteMany()
-  await prisma.transaction.deleteMany()
-  await prisma.redemption.deleteMany()
-  await prisma.userMission.deleteMany()
-  await prisma.userProgram.deleteMany()
-  await prisma.product.deleteMany()
-  await prisma.mission.deleteMany()
-  await prisma.tier.deleteMany()
-  await prisma.program.deleteMany()
-  await prisma.user.deleteMany()
+  // Check if admin user already exists
+  const existingAdmin = await prisma.user.findUnique({
+    where: { email: 'admin@loyalty.com' }
+  })
+
+  if (existingAdmin) {
+    console.log('✅ Admin user already exists, skipping seed.')
+    return
+  }
+
+  console.log('📝 Creating initial data...')
 
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 10)
