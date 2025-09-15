@@ -39,7 +39,6 @@ next-env.d.ts
 # prisma
 /prisma/*.db
 /prisma/*.db-journal
-/prisma/migrations/
 
 # development and testing files
 *.test.js
