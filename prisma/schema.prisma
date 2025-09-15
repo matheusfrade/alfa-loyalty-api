@@ -1,0 +1,273 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== CORE MODELS ====================
+
+model Program {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?
+  type        String @default("GAMING")
+  config      String      @default("{}") // JSON as string for SQLite
+  branding    String      @default("{}") // JSON as string for SQLite
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  missions     Mission[]
+  products     Product[]
+  tiers        Tier[]
+  users        UserProgram[]
+  events       Event[]
+  transactions Transaction[]
+  analytics    Analytics[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  externalId   String?  @unique // ID from external system
+  email        String   @unique
+  password     String
+  name         String
+  avatar       String?
+  isAdmin      Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  programs     UserProgram[]
+  missions     UserMission[]
+  redemptions  Redemption[]
+  transactions Transaction[]
+  events       Event[]
+  notifications Notification[]
+}
+
+model UserProgram {
+  id        String    @id @default(cuid())
+  userId    String
+  programId String
+  coins     Int       @default(0)
+  xp        Int       @default(0)
+  tierId    String?
+  joinedAt  DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program   Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  tier      Tier?     @relation(fields: [tierId], references: [id])
+
+  @@unique([userId, programId])
+}
+
+// ==================== MISSIONS ====================
+
+model Mission {
+  id           String           @id @default(cuid())
+  programId    String
+  title        String
+  description  String
+  category     String
+  type         String      @default("SINGLE")
+  icon         String?
+  reward       Int              @default(0) // coins
+  xpReward     Int              @default(0)
+  requirement  String           @default("{}") // JSON as string
+  maxClaims    Int?
+  startDate    DateTime?
+  endDate      DateTime?
+  tierRequired String?
+  isActive     Boolean          @default(true)
+  order        Int              @default(0)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  program      Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  tier         Tier?            @relation(fields: [tierRequired], references: [id])
+  userMissions UserMission[]
+  productRewards MissionProduct[]
+}
+
+model UserMission {
+  id          String          @id @default(cuid())
+  userId      String
+  missionId   String
+  status      String   @default("ACTIVE")
+  progress    Int             @default(0)
+  claimCount  Int             @default(0)
+  startedAt   DateTime        @default(now())
+  completedAt DateTime?
+  claimedAt   DateTime?
+  metadata    String          @default("{}") // JSON as string
+
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission     Mission         @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, missionId])
+}
+
+// Relation table for Mission rewards
+model MissionProduct {
+  missionId String
+  productId String
+  quantity  Int      @default(1)
+  
+  mission   Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@id([missionId, productId])
+}
+
+// ==================== REWARDS & PRODUCTS ====================
+
+model Product {
+  id              String           @id @default(cuid())
+  programId       String
+  name            String
+  description     String
+  category        String
+  price           Int              // in coins
+  image           String?
+  stock           Int?             // null = unlimited
+  tierRequired    String?
+  validFrom       DateTime?
+  validUntil      DateTime?
+  deliveryType    String     @default("AUTOMATIC")
+  metadata        String           @default("{}") // JSON as string
+  isActive        Boolean          @default(true)
+  order           Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  program         Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  tier            Tier?            @relation(fields: [tierRequired], references: [id])
+  redemptions     Redemption[]
+  missionRewards  MissionProduct[]
+}
+
+model Redemption {
+  id           String            @id @default(cuid())
+  userId       String
+  productId    String
+  status       String  @default("PENDING")
+  code         String?           @unique
+  deliveryInfo String?           // JSON as string
+  notes        String?
+  redeemedAt   DateTime          @default(now())
+  processedAt  DateTime?
+  deliveredAt  DateTime?
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product      Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// ==================== TIERS ====================
+
+model Tier {
+  id           String   @id @default(cuid())
+  programId    String
+  name         String
+  level        Int      // 0, 1, 2, 3, 4, 5
+  requiredXP   Int
+  color        String
+  icon         String?
+  multiplier   Float    @default(1.0) // coin multiplier
+  benefits     String   @default("[]") // JSON array as string
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  program      Program       @relation(fields: [programId], references: [id], onDelete: Cascade)
+  users        UserProgram[]
+  missions     Mission[]
+  products     Product[]
+
+  @@unique([programId, level])
+}
+
+// ==================== TRANSACTIONS & EVENTS ====================
+
+model Transaction {
+  id          String           @id @default(cuid())
+  userId      String
+  programId   String
+  type        String
+  amount      Int              // positive or negative
+  balance     Int              // balance after transaction
+  reference   String?          // reference to mission/redemption/etc
+  description String
+  metadata    String           @default("{}") // JSON as string
+  createdAt   DateTime         @default(now())
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program     Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  programId   String
+  userId      String
+  type        String   // flexible event type
+  data        String   @default("{}") // JSON as string
+  processed   Boolean  @default(false)
+  processedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  program     Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ==================== NOTIFICATIONS ====================
+
+model Notification {
+  id         String            @id @default(cuid())
+  userId     String
+  type       String
+  title      String
+  message    String
+  data       String            @default("{}") // JSON as string
+  isRead     Boolean           @default(false)
+  readAt     DateTime?
+  createdAt  DateTime          @default(now())
+
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ==================== ANALYTICS ====================
+
+model Analytics {
+  id          String   @id @default(cuid())
+  programId   String
+  date        DateTime @default(now())
+  metric      String
+  value       Float
+  dimensions  String   @default("{}") // JSON as string
+  createdAt   DateTime @default(now())
+
+  program     Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@index([programId, date, metric])
+}
+
+// ==================== ENUMS (as TypeScript types) ====================
+// Note: SQLite doesn't support native enums, so we use strings with TypeScript validation
+
+// ProgramType: GAMING | ECOMMERCE | RETAIL | SAAS | EDUCATION | CUSTOM
+// MissionCategory: LOGIN | BETTING | DEPOSIT | TUTORIAL | SPECIAL | DAILY | WEEKLY | MONTHLY | ACHIEVEMENT  
+// MissionType: SINGLE | RECURRING | STREAK | MILESTONE
+// MissionStatus: ACTIVE | COMPLETED | CLAIMED | EXPIRED
+// ProductCategory: BONUS | CASHBACK | FREESPINS | PHYSICAL | EXPERIENCE | CREDITS | PREMIUM | DISCOUNT | VOUCHER
+// DeliveryType: AUTOMATIC | CODE | PHYSICAL | MANUAL
+// RedemptionStatus: PENDING | PROCESSING | COMPLETED | CANCELLED | EXPIRED | FAILED
+// TransactionType: EARNED | SPENT | BONUS | ADJUSTMENT | EXPIRED | REFUND
+// NotificationType: MISSION_COMPLETE | REWARD_AVAILABLE | TIER_UPGRADE | COINS_EARNED | PRODUCT_REDEEMED | GENERAL
