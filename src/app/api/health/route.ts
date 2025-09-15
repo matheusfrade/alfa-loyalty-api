@@ -7,7 +7,13 @@ export async function GET(request: NextRequest) {
       hasJwtSecret: !!process.env.JWT_SECRET,
       hasDatabaseUrl: !!process.env.DATABASE_URL,
       nodeEnv: process.env.NODE_ENV,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      // Railway-specific variables
+      hasPGHost: !!process.env.PGHOST,
+      hasPGDatabase: !!process.env.PGDATABASE,
+      hasPGUser: !!process.env.PGUSER,
+      hasPGPassword: !!process.env.PGPASSWORD,
+      pgPort: process.env.PGPORT,
     }
 
     // Try to import and use Prisma
@@ -41,6 +47,11 @@ export async function GET(request: NextRequest) {
           hasJwtSecret: !!process.env.JWT_SECRET,
           hasDatabaseUrl: !!process.env.DATABASE_URL,
           nodeEnv: process.env.NODE_ENV,
+          // Railway-specific variables
+          hasPGHost: !!process.env.PGHOST,
+          hasPGDatabase: !!process.env.PGDATABASE,
+          hasPGUser: !!process.env.PGUSER,
+          hasPGPassword: !!process.env.PGPASSWORD,
         }
       },
       { status: 500 }
