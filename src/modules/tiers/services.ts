@@ -550,7 +550,11 @@ export class TierService {
       expirationSchedule,
       alerts: {
         vipInflation,
-        massExpiration: expirationSchedule.filter(e => e.pointsExpiring > 10000) // Alerta para mais de 10k pontos expirando
+        massExpiration: expirationSchedule.filter(e => e.pointsExpiring > 10000).map(e => ({
+          date: e.period,
+          pointsExpiring: e.pointsExpiring,
+          playersAffected: e.playersAffected
+        })) // Alerta para mais de 10k pontos expirando
       }
     }
   }

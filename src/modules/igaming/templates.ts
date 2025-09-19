@@ -28,7 +28,8 @@ export const SPORTSBOOK_TEMPLATES: MissionTemplate[] = [
       timeWindow: {
         duration: '7d',
         sliding: true
-      }
+      },
+      logic: 'AND'
     },
     defaultReward: 150,
     defaultXP: 75,
@@ -69,7 +70,8 @@ export const SPORTSBOOK_TEMPLATES: MissionTemplate[] = [
       timeWindow: {
         duration: '30d',
         sliding: true
-      }
+      },
+      logic: 'AND'
     },
     defaultReward: 200,
     defaultXP: 100,
@@ -104,7 +106,8 @@ export const SPORTSBOOK_TEMPLATES: MissionTemplate[] = [
       timeWindow: {
         duration: '30d',
         sliding: true
-      }
+      },
+      logic: 'AND'
     },
     defaultReward: 500,
     defaultXP: 250,
@@ -138,7 +141,8 @@ export const SPORTSBOOK_TEMPLATES: MissionTemplate[] = [
         duration: '30d',
         sliding: false,
         resetTime: '00:00'
-      }
+      },
+      logic: 'AND'
     },
     defaultReward: 300,
     defaultXP: 150,
@@ -172,7 +176,8 @@ export const SPORTSBOOK_TEMPLATES: MissionTemplate[] = [
       timeWindow: {
         duration: '30d',
         sliding: true
-      }
+      },
+      logic: 'AND'
     },
     defaultReward: 250,
     defaultXP: 125,
@@ -202,7 +207,8 @@ export const SPORTSBOOK_TEMPLATES: MissionTemplate[] = [
       timeWindow: {
         duration: '30d',
         sliding: true
-      }
+      },
+      logic: 'AND'
     },
     defaultReward: 180,
     defaultXP: 90,
@@ -238,7 +244,8 @@ export const CASINO_TEMPLATES: MissionTemplate[] = [
       timeWindow: {
         duration: '7d',
         sliding: true
-      }
+      },
+      logic: 'AND'
     },
     defaultReward: 120,
     defaultXP: 60,
@@ -272,7 +279,8 @@ export const CASINO_TEMPLATES: MissionTemplate[] = [
       timeWindow: {
         duration: '30d',
         sliding: true
-      }
+      },
+      logic: 'AND'
     },
     defaultReward: 200,
     defaultXP: 100,
@@ -302,7 +310,8 @@ export const CASINO_TEMPLATES: MissionTemplate[] = [
         operator: '>=',
         value: 1
       }],
-      maxClaims: 1
+      maxClaims: 1,
+      logic: 'AND'
     },
     defaultReward: 400,
     defaultXP: 200,
@@ -332,7 +341,8 @@ export const CASINO_TEMPLATES: MissionTemplate[] = [
       timeWindow: {
         duration: '7d',
         sliding: true
-      }
+      },
+      logic: 'AND'
     },
     defaultReward: 350,
     defaultXP: 175,
@@ -365,7 +375,8 @@ export const CASINO_TEMPLATES: MissionTemplate[] = [
       timeWindow: {
         duration: '7d',
         sliding: true
-      }
+      },
+      logic: 'AND'
     },
     defaultReward: 160,
     defaultXP: 80,
@@ -398,7 +409,8 @@ export const LIVE_CASINO_TEMPLATES: MissionTemplate[] = [
       timeWindow: {
         duration: '7d',
         sliding: true
-      }
+      },
+      logic: 'AND'
     },
     defaultReward: 100,
     defaultXP: 50,
@@ -431,7 +443,8 @@ export const LIVE_CASINO_TEMPLATES: MissionTemplate[] = [
       timeWindow: {
         duration: '7d',
         sliding: true
-      }
+      },
+      logic: 'AND'
     },
     defaultReward: 140,
     defaultXP: 70,
@@ -503,7 +516,8 @@ export const SPECIALIZED_TEMPLATES: MissionTemplate[] = [
         duration: '7d',
         sliding: true
       },
-      cooldown: 604800 // 1 semana
+      cooldown: 604800, // 1 semana
+      logic: 'AND'
     },
     defaultReward: 100,
     defaultXP: 50,

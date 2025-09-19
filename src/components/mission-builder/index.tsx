@@ -191,7 +191,7 @@ export function MissionBuilder({
     }
     
     const hasValidTriggers = rule.triggers?.length > 0 && rule.triggers.every(trigger => trigger.event)
-    const hasValidConditions = rule.conditions?.length > 0 && rule.conditions.every(condition => 
+    const hasValidConditions = (rule.conditions?.length ?? 0) > 0 && (rule.conditions ?? []).every(condition =>
       condition.field && condition.operator && (condition.value !== undefined && condition.value !== null)
     )
     
@@ -618,7 +618,7 @@ export function MissionBuilder({
                 <h3 className="text-lg font-medium text-gray-900 mb-3">Regras Configuradas</h3>
                 <div className="space-y-2 text-sm text-gray-600">
                   <div><strong className="text-gray-900">Eventos Disparadores:</strong> {currentRule.triggers.length}</div>
-                  <div><strong className="text-gray-900">Condições:</strong> {currentRule.conditions.length}</div>
+                  <div><strong className="text-gray-900">Condições:</strong> {currentRule.conditions?.length ?? 0}</div>
                   <div><strong className="text-gray-900">Lógica:</strong> {currentRule.logic || 'AND'}</div>
                 </div>
               </div>

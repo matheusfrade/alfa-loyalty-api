@@ -80,6 +80,7 @@ export function CreateRewardModal({ onSuccess }: CreateRewardModalProps) {
           details: '',
         },
         isActive: true,
+        isShopVisible: true,
       })
       
       if (onSuccess) {

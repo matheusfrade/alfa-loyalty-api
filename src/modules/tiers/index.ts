@@ -7,7 +7,6 @@ export const TIERS_MODULE: ModuleDefinition = {
   description: 'Sistema avançado de tiers com pontos expiráveis e períodos de manutenção',
   version: '1.0.0',
   icon: '🏆',
-  category: 'loyalty',
 
   // Event types específicos do módulo de tiers
   eventTypes: [
@@ -173,9 +172,12 @@ export const TIERS_MODULE: ModuleDefinition = {
       name: 'Ganhar Pontos de Tier',
       description: 'Missão simples para ganhar pontos de tier',
       category: 'TIER_POINTS',
-      difficulty: 'LOW',
+      difficulty: 'easy',
       tags: ['tier', 'pontos', 'simples'],
       module: 'tiers',
+      vertical: 'GENERAL',
+      defaultReward: 50,
+      defaultXP: 25,
       rule: {
         triggers: [{ event: TIER_EVENT_TYPES.POINTS_EARNED }],
         conditions: [
@@ -185,14 +187,7 @@ export const TIERS_MODULE: ModuleDefinition = {
             value: 100
           }
         ],
-        rewards: {
-          coins: 50,
-          xp: 25
-        },
-        meta: {
-          description: 'Ganhe pontos para seu tier',
-          icon: '⭐'
-        }
+        logic: 'AND'
       }
     },
     {
@@ -200,20 +195,16 @@ export const TIERS_MODULE: ModuleDefinition = {
       name: 'Subir de Tier',
       description: 'Recompensa por subir de tier',
       category: 'TIER_ACHIEVEMENT',
-      difficulty: 'MEDIUM',
+      difficulty: 'medium',
       tags: ['tier', 'upgrade', 'conquista'],
       module: 'tiers',
+      vertical: 'GENERAL',
+      defaultReward: 500,
+      defaultXP: 250,
       rule: {
         triggers: [{ event: TIER_EVENT_TYPES.TIER_UPGRADED }],
         conditions: [],
-        rewards: {
-          coins: 500,
-          xp: 250
-        },
-        meta: {
-          description: 'Parabéns por subir de tier!',
-          icon: '📈'
-        }
+        logic: 'AND'
       }
     },
     {
@@ -221,9 +212,12 @@ export const TIERS_MODULE: ModuleDefinition = {
       name: 'Manter Tier Premium',
       description: 'Recompensa por manter tier alto',
       category: 'TIER_MAINTENANCE',
-      difficulty: 'HIGH',
+      difficulty: 'expert',
       tags: ['tier', 'manutenção', 'vip'],
       module: 'tiers',
+      vertical: 'GENERAL',
+      defaultReward: 1000,
+      defaultXP: 500,
       rule: {
         triggers: [{ event: TIER_EVENT_TYPES.PERIOD_CLOSED }],
         conditions: [
@@ -233,36 +227,29 @@ export const TIERS_MODULE: ModuleDefinition = {
             value: 3
           }
         ],
-        rewards: {
-          coins: 1000,
-          xp: 500
-        },
-        meta: {
-          description: 'Recompensa por manter tier premium',
-          icon: '🏆'
-        }
+        logic: 'AND'
       }
     }
   ],
 
-  // Componentes específicos do módulo (para futuras expansões)
-  components: {
-    TierStatusWidget: {
-      name: 'Widget de Status do Tier',
-      description: 'Mostra status atual do tier do jogador',
-      props: ['playerId', 'programId', 'showDetails']
-    },
-    TierProgressBar: {
-      name: 'Barra de Progresso do Tier',
-      description: 'Mostra progresso para próximo tier',
-      props: ['playerId', 'programId', 'showPoints']
-    },
-    TierExpirationAlert: {
-      name: 'Alerta de Expiração',
-      description: 'Alerta sobre pontos que vão expirar',
-      props: ['playerId', 'programId', 'daysAhead']
-    }
-  },
+  // Componentes específicos do módulo (comentado temporariamente)
+  // components: {
+  //   TierStatusWidget: {
+  //     name: 'Widget de Status do Tier',
+  //     description: 'Mostra status atual do tier do jogador',
+  //     props: ['playerId', 'programId', 'showDetails']
+  //   },
+  //   TierProgressBar: {
+  //     name: 'Barra de Progresso do Tier',
+  //     description: 'Mostra progresso para próximo tier',
+  //     props: ['playerId', 'programId', 'showPoints']
+  //   },
+  //   TierExpirationAlert: {
+  //     name: 'Alerta de Expiração',
+  //     description: 'Alerta sobre pontos que vão expirar',
+  //     props: ['playerId', 'programId', 'daysAhead']
+  //   }
+  // },
 
   // Traduções
   translations: {
@@ -311,48 +298,53 @@ export const TIERS_MODULE: ModuleDefinition = {
         description: 'Aplicar soft reset de pontos no fechamento',
         enabled: true
       }
-    ],
-    defaultValues: {
-      pointsExpireAfterM: 12,
-      softResetFactor: 0.5,
-      vipInflationThreshold: 12,
-      defaultPeriodType: 'SEMESTRE'
-    }
+    ]
+    // Comentado temporariamente até interface ser fixada
+    // defaultValues: {
+    //   pointsExpireAfterM: 12,
+    //   softResetFactor: 0.5,
+    //   vipInflationThreshold: 12,
+    //   defaultPeriodType: 'SEMESTRE'
+    // }
   },
 
-  // Validações específicas
-  validators: [
-    {
-      name: 'tierRanges',
-      validate: (tiers: any[]) => {
-        // Implementar validação de ranges
-        return { isValid: true, errors: [] }
-      }
-    },
-    {
-      name: 'periodPolicy',
-      validate: (policy: any) => {
-        // Validar política de período
-        return { isValid: true, errors: [] }
-      }
-    }
-  ],
+  // Validações específicas (comentado temporariamente)
+  // validators: [
+  //   {
+  //     name: 'tierRanges',
+  //     validate: (tiers: any[]) => {
+  //       // Implementar validação de ranges
+  //       return { isValid: true, errors: [] }
+  //     }
+  //   },
+  //   {
+  //     name: 'periodPolicy',
+  //     validate: (policy: any) => {
+  //       // Validar política de período
+  //       return { isValid: true, errors: [] }
+  //     }
+  //   }
+  // ],
 
-  // Hooks do ciclo de vida
-  hooks: {
-    onInstall: async (programId: string) => {
-      console.log(`Installing Tiers module for program ${programId}`)
-      // Criar tiers padrão e política se não existirem
-    },
-    onUninstall: async (programId: string) => {
-      console.log(`Uninstalling Tiers module for program ${programId}`)
-      // Limpar dados específicos se necessário
-    },
-    onConfigChange: async (programId: string, config: any) => {
-      console.log(`Tiers module config changed for program ${programId}`)
-      // Reagir a mudanças de configuração
-    }
-  }
+  // Hooks do ciclo de vida (comentado temporariamente)
+  // hooks: {
+  //   onInstall: async (programId: string) => {
+  //     console.log(`Installing Tiers module for program ${programId}`)
+  //     // Criar tiers padrão e política se não existirem
+  //   },
+  //   onUninstall: async (programId: string) => {
+  //     console.log(`Uninstalling Tiers module for program ${programId}`)
+  //     // Limpar dados específicos se necessário
+  //   },
+  //   onConfigChange: async (programId: string, config: any) => {
+  //     console.log(`Tiers module config changed for program ${programId}`)
+  //     // Reagir a mudanças de configuração
+  //   }
+  // },
+
+  // Required empty arrays for build
+  validators: [],
+  components: {}
 }
 
 // Export services para uso externo

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { 
-  CustomerGroup, 
+import {
+  CustomerGroup,
+  CustomerGroupSelection,
   UseCustomerGroupsResult,
   UseCustomerGroupSearchResult
 } from '@/types/customer-groups'
@@ -26,11 +27,8 @@ export function useCustomerGroups(): UseCustomerGroupsResult {
       setGroups(data.data || [])
     } catch (err: any) {
       console.error('Error fetching customer groups:', err)
-      setError({
-        code: 'FETCH_ERROR',
-        message: err.message || 'Failed to fetch customer groups',
-        details: err
-      })
+      const error = new Error(err.message || 'Failed to fetch customer groups')
+      setError(error)
     } finally {
       setLoading(false)
     }
@@ -90,11 +88,7 @@ export function useCustomerGroupSearch(): UseCustomerGroupSearchResult {
         } catch (err: any) {
           console.error('Error searching customer groups:', err)
           // Em caso de erro, retornar array vazio ao invés de rejeitar
-          const searchError = {
-            code: 'SEARCH_ERROR',
-            message: err.message || 'Failed to search customer groups',
-            details: err
-          }
+          const searchError = new Error(err.message || 'Failed to search customer groups')
           setError(searchError)
           resolve([]) // Resolver com array vazio para evitar loops
         } finally {
@@ -158,11 +152,8 @@ export function useCustomerGroupsByIds(ids: string[]) {
       console.error('Error fetching groups by IDs:', err)
       // Para erros de API, use dados mock para evitar loops infinitos
       setGroups([])
-      setError({
-        code: 'BATCH_ERROR',
-        message: err.message || 'Failed to fetch groups',
-        details: err
-      })
+      const error = new Error(err.message || 'Failed to fetch groups')
+      setError(error)
     } finally {
       setLoading(false)
     }
@@ -188,7 +179,7 @@ export function useCustomerGroupsByIds(ids: string[]) {
 }
 
 // Hook for managing customer group selection state
-export function useCustomerGroupSelection(initialValue = { include: [], exclude: [] }) {
+export function useCustomerGroupSelection(initialValue: CustomerGroupSelection = { include: [], exclude: [] }) {
   const [selection, setSelection] = useState(() => initialValue)
 
   const addToInclude = useCallback((groupId: string) => {

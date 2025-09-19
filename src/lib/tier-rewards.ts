@@ -88,13 +88,13 @@ export async function deliverTierRewards(
           userId,
           productId: tierReward.productId,
           status: 'COMPLETED',
-          isAutomatic: true,
-          metadata: JSON.stringify({
+          deliveryInfo: JSON.stringify({
             tierRewardId: tierReward.id,
             tierName: tierReward.tier.name,
             rewardType: tierReward.rewardType,
             deliveredAt: new Date().toISOString(),
           }),
+          deliveredAt: new Date(),
         },
       })
 
@@ -105,7 +105,7 @@ export async function deliverTierRewards(
           tierRewardId: tierReward.id,
           redemptionId: redemption.id,
           usedAt: new Date(),
-          quotaPeriod: getCurrentQuotaPeriod(tierReward.quotaType),
+          period: getCurrentQuotaPeriod(tierReward.quotaType),
         },
       })
 
@@ -147,7 +147,7 @@ async function checkQuotaLimits(
     where: {
       userId,
       tierRewardId,
-      quotaPeriod: currentPeriod,
+      period: currentPeriod,
     },
   })
 
@@ -213,7 +213,7 @@ export async function updateUserTier(
     })
 
     // Deliver tier rewards
-    const tierRewards = await deliverTierRewards(userId, programId, newTierId, oldTierId)
+    const tierRewards = await deliverTierRewards(userId, programId, newTierId, oldTierId || undefined)
 
     return {
       success: true,
@@ -261,7 +261,7 @@ export async function checkAndUpgradeTiers(userId: string, programId: string): P
     let targetTier = tiers[0] // Default to lowest tier
 
     for (const tier of tiers) {
-      if (userProgram.xp >= tier.xpRequired) {
+      if (userProgram.xp >= tier.requiredXP) {
         targetTier = tier
       } else {
         break

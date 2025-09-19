@@ -33,7 +33,8 @@ export function CreateMissionModal({ onSuccess }: CreateMissionModalProps) {
     name: string
     description: string
     reward: number
-    xp: number
+    coins: number
+    tierPoints?: number
     type?: string
     category?: string
     recurrence?: string
@@ -41,6 +42,7 @@ export function CreateMissionModal({ onSuccess }: CreateMissionModalProps) {
     startDate?: string
     endDate?: string
     productRewards?: Array<{ productId: string; quantity: number }>
+    customerGroups?: any
   }) => {
     setLoading(true)
     try {
@@ -60,7 +62,8 @@ export function CreateMissionModal({ onSuccess }: CreateMissionModalProps) {
         type: mission.type || 'RECURRING',
         icon: '🎮', // Could come from module definition
         reward: mission.reward,
-        xpReward: mission.xp,
+        xpReward: mission.coins,
+        tierPointsReward: mission.tierPoints || 0,
         requirement: mission.rule, // Our modular rule
         maxClaims: mission.maxClaims,
         startDate: mission.startDate,

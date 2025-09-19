@@ -1,0 +1,39 @@
+# Playwright and test files
+playwright.config.ts
+playwright-report/
+test-results/
+tests/
+*.spec.ts
+*.spec.js
+*.test.ts
+*.test.js
+
+# Development files
+.env.local
+.env.development
+.vscode/
+.idea/
+
+# Documentation and misc
+*.md
+ARQUITETURA_*.md
+EVENTSELECTOR_*.md
+MISSION_IDEAS.md
+MODULE_REGISTRY_*.md
+manual-test-guide.md
+simple-test.html
+server.log
+
+# Node modules and build artifacts
+node_modules/
+.next/
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore

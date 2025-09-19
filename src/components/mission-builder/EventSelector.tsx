@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { EventTypeUI } from '@/types/mission-types'
 import { Search, ChevronDown, X } from 'lucide-react'
+import { EventTypeUI } from '@/types/event-types'
 
 export interface EventSelectorProps {
   value?: string

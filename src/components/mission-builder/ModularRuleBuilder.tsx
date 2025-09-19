@@ -3,7 +3,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { getAllEventTypesForUI, getModule, initializeModules } from '../../modules'
-import type { BaseMissionRule, EventTypeDefinition, FieldDefinition, ConditionGroup, BaseTrigger } from '../../core/types'
+import type { BaseMissionRule, ConditionGroup, BaseTrigger, FieldDefinition } from '../../core/types'
+import { EventTypeUI } from '@/types/event-types'
 import { AdvancedConditionBuilder } from './AdvancedConditionBuilder'
 import { TriggerConfigurator } from './TriggerConfigurator'
 import { MissionPreview } from './MissionPreview'
@@ -21,9 +22,6 @@ interface ModularRuleBuilderProps {
   className?: string
 }
 
-interface EventTypeUI extends EventTypeDefinition {
-  fields: FieldDefinition[]
-}
 
 export function ModularRuleBuilder({
   moduleName,
@@ -115,12 +113,12 @@ export function ModularRuleBuilder({
         console.log('✅ Event types set in state')
       } catch (moduleError) {
         console.error('❌ Error during module initialization:', moduleError)
-        console.error('❌ Module error stack:', moduleError.stack)
+        console.error('❌ Module error stack:', (moduleError as Error)?.stack)
       }
 
     } catch (error) {
       console.error('❌ Failed to load module data:', error)
-      console.error('❌ Error stack:', error.stack)
+      console.error('❌ Error stack:', (error as Error)?.stack)
     } finally {
       console.log('🏁 ModularRuleBuilder: Load module data completed, setting loading to false')
       setLoading(false)
@@ -184,7 +182,7 @@ export function ModularRuleBuilder({
   }
 
   const handleConditionChange = (conditionIndex: number, field: string, value: any) => {
-    const newConditions = [...currentRule.conditions]
+    const newConditions = [...(currentRule.conditions ?? [])]
     newConditions[conditionIndex] = {
       ...newConditions[conditionIndex],
       [field]: value
@@ -205,12 +203,12 @@ export function ModularRuleBuilder({
     
     setCurrentRule({
       ...currentRule,
-      conditions: [...currentRule.conditions, newCondition]
+      conditions: [...(currentRule.conditions ?? []), newCondition]
     })
   }
 
   const removeCondition = (index: number) => {
-    const newConditions = currentRule.conditions.filter((_, i) => i !== index)
+    const newConditions = (currentRule.conditions ?? []).filter((_, i) => i !== index)
     setCurrentRule({
       ...currentRule,
       conditions: newConditions
@@ -832,7 +830,7 @@ export function ModularRuleBuilder({
       )}
 
       {/* Rule Summary */}
-      {currentRule.triggers && currentRule.triggers.length > 0 && currentRule.conditions.length > 0 && (
+      {currentRule.triggers && currentRule.triggers.length > 0 && (currentRule.conditions?.length ?? 0) > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-3">
             <span>📝</span>
@@ -855,8 +853,8 @@ export function ModularRuleBuilder({
               )}
             </p>
             <p className="text-sm text-gray-700 m-0">
-              <strong className="text-gray-900">Condições:</strong> {currentRule.conditions.length} condição(ões)
-              {currentRule.conditions.length > 1 && (
+              <strong className="text-gray-900">Condições:</strong> {currentRule.conditions?.length ?? 0} condição(ões)
+              {(currentRule.conditions?.length ?? 0) > 1 && (
                 <span> com lógica <strong className="text-gray-900">{currentRule.logic}</strong></span>
               )}
             </p>

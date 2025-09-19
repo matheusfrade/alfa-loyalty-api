@@ -38,7 +38,6 @@
     "jose": "^5.2.0",
     "lucide-react": "^0.309.0",
     "next": "14.2.0",
-    "playwright": "^1.55.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "recharts": "^2.10.0",
@@ -48,6 +47,7 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.0.0",
     "@types/react": "^18.3.0",
@@ -55,6 +55,7 @@
     "autoprefixer": "^10.4.16",
     "eslint": "^8.0.0",
     "eslint-config-next": "^14.2.0",
+    "playwright": "^1.55.0",
     "postcss": "^8.4.32",
     "prisma": "^5.19.0",
     "tailwindcss": "^3.4.0",
