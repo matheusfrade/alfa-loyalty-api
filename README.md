@@ -44,7 +44,7 @@ Generic, white-label loyalty system API with admin panel.
 - `GET /api/auth/me` - Get current user
 
 ### Missions
-- `GET /api/missions` - List missions
+- `GET /api/missions` - List missions (supports `?includeInactive=true` for admins)
 - `POST /api/missions` - Create mission (admin)
 - `POST /api/missions/{id}/claim` - Claim mission reward
 
@@ -55,6 +55,18 @@ Generic, white-label loyalty system API with admin panel.
 
 ### Users
 - `GET /api/users/{id}` - Get user details
+
+### Admin APIs
+- `GET /api/admin/users` - List all users with program details (admin)
+- `GET /api/admin/programs` - List all programs with statistics (admin)
+- `GET /api/admin/stats` - Dashboard statistics and metrics (admin)
+- `GET /api/admin/analytics` - Comprehensive analytics data (admin)
+- `GET /api/admin/tiers` - List tiers with user counts and analytics
+- `GET /api/admin/tier-rewards` - List tier rewards with usage statistics
+- `POST /api/admin/tier-rewards` - Create new tier reward configuration
+- `GET /api/admin/metrics/tiers` - Tier-based analytics and insights
+- `PUT /api/admin/users/{userId}/tier` - Manually update user tier (triggers reward delivery)
+- `GET /api/programs` - List available programs
 
 ## 🏗️ Architecture
 
@@ -84,11 +96,14 @@ Generic, white-label loyalty system API with admin panel.
 - **Redemption** - Purchase history
 - **Transaction** - Coin movement tracking
 - **Tier** - User progression levels
+- **TierReward** - Tier-specific reward configurations
+- **TierRewardUsage** - Tier reward usage tracking and quotas
 
 ### Key Features
 - **Flexible Missions:** Support for single, recurring, streak, and milestone missions
 - **Rich Rewards:** Multiple delivery types (automatic, code, physical, manual)
 - **Tier System:** Progressive levels with multipliers and benefits
+- **Tier Rewards:** Automatic reward delivery on tier changes with quota management
 - **Transaction History:** Complete audit trail
 - **Real-time Notifications:** In-app messaging system
 
@@ -99,19 +114,47 @@ Generic, white-label loyalty system API with admin panel.
 // Example mission requirement
 {
   type: "daily_login",
-  streak: 7,        // 7 consecutive days
-  reward: 50,       // base coins
-  xpReward: 10      // XP for tier progression
+  streak: 7,               // 7 consecutive days
+  reward: 50,              // coins for store purchases
+  tierPointsReward: 10     // tier points for progression (separate from coins)
 }
 ```
 
-### Tier Multipliers
-- **Iniciante:** 1.0x (0 XP)
-- **Bronze:** 1.2x (100 XP)
-- **Prata:** 1.5x (500 XP)
-- **Ouro:** 2.0x (1,500 XP)
-- **Diamante:** 2.5x (5,000 XP)
-- **VIP:** 3.0x (15,000 XP)
+### Economy System
+**Coins vs Tier Points Separation:**
+- **Coins** (`reward` field): Currency for purchasing products in the store
+- **Tier Points** (`tierPointsReward` field): Points for tier progression and unlocking benefits
+- **XP System**: Removed as it was redundant with tier points
+
+### Tier System & Automatic Rewards
+- **Iniciante:** 1.0x (0 Tier Points)
+- **Bronze:** 1.2x (100 Tier Points)
+- **Prata:** 1.5x (500 Tier Points)
+- **Ouro:** 2.0x (1,500 Tier Points)
+- **Diamante:** 2.5x (5,000 Tier Points)
+- **VIP:** 3.0x (15,000 Tier Points)
+
+#### Tier Rewards System
+The platform includes a sophisticated tier rewards system that automatically delivers rewards when users change tiers:
+
+**Reward Types:**
+- **WELCOME**: One-time rewards for reaching a new tier
+- **RECURRING**: Rewards delivered each time user enters a tier
+- **MILESTONE**: Special rewards for first-time tier achievement
+- **EXCLUSIVE**: Tier-specific rewards with special access
+
+**Quota Management:**
+- **DAILY**: Limited uses per day
+- **WEEKLY**: Limited uses per week
+- **MONTHLY**: Limited uses per month
+- **PER_TIER**: Once per tier membership period
+- **UNLIMITED**: No usage restrictions
+
+**Auto-Delivery Features:**
+- Automatic reward delivery on tier upgrades
+- Smart quota tracking and enforcement
+- Usage analytics and reporting
+- Admin override capabilities
 
 ### Reward Categories
 - **BONUS** - Free bets, multipliers
@@ -138,7 +181,22 @@ Generic, white-label loyalty system API with admin panel.
 - **🔘 Fixed Button Handlers**: Programs page buttons (Analytics, API Keys, White-label) now functional
 - **📊 Better UX**: Real-time validation feedback and progress indicators
 
-### Automated Testing Suite  
+### Dashboard & Analytics Integration v3.0
+- **📊 Real Data Integration**: All dashboards now fed with consistent real database data
+- **🎯 Mission Count Accuracy**: Fixed discrepancies between dashboard stats and mission lists
+- **🔍 Inactive Mission Support**: Admin can view both active and inactive missions
+- **📈 Analytics API**: Comprehensive analytics endpoint with real-time calculations
+- **👥 Users Management**: Real-time user data with program details and tier information
+- **🏆 Programs Management**: Connected to real API data with accurate counts and statistics
+
+### Coins & Rewards System v2.0
+- **🪙 Coins Integration**: Separated Coins from XP - Coins for store purchases, Tier Points for progression
+- **🛒 Store-Ready**: Coins system designed for product purchasing workflow
+- **🎯 Mission Rewards**: Updated mission creation to use Coins instead of redundant XP field
+- **⚖️ Balanced Economy**: Clear separation between purchasing power (Coins) and progression (Tier Points)
+- **💳 Transaction Tracking**: Enhanced transaction system for coin movements
+
+### Automated Testing Suite
 - **🎭 Playwright Integration**: Browser automation for E2E testing
 - **🧪 Validation Testing**: Comprehensive test coverage for mission creation flow
 - **📸 Screenshot Debugging**: Visual debugging with automatic screenshot capture
@@ -149,6 +207,8 @@ Generic, white-label loyalty system API with admin panel.
 - **🔄 Date Format Flexibility**: Backend accepts multiple date formats with auto-conversion
 - **⚡ Performance Optimized**: Parallel tool execution and batch operations
 - **🛡️ Enhanced Security**: Input validation with Zod schema improvements
+- **🔗 API Consistency**: All admin pages now use real database APIs instead of mock data
+- **📊 Real-time Stats**: Dashboard metrics calculated from actual database queries
 
 ## 🔧 Configuration
 
@@ -232,12 +292,18 @@ src/
 │   ├── api/         # API endpoints
 │   │   ├── missions/    # Mission CRUD operations
 │   │   ├── rewards/     # Product & redemption management
+│   │   ├── admin/       # Admin APIs (users, programs, stats, analytics)
+│   │   ├── programs/    # Program management
 │   │   └── auth/        # Authentication endpoints
 │   ├── admin/       # Admin panel
 │   │   ├── missions/    # Mission management interface
-│   │   └── programs/    # Program configuration
+│   │   ├── programs/    # Program configuration
+│   │   ├── users/       # User management interface
+│   │   └── dashboard/   # Analytics and overview
 │   └── login/       # Authentication pages
 ├── components/       # React components
+│   ├── ui/              # UI components
+│   │   └── tier-status-widget.tsx  # Tier display component
 │   ├── admin/           # Admin-specific components
 │   │   ├── EditMissionModal.tsx
 │   │   ├── RewardSelector.tsx
@@ -265,7 +331,7 @@ final-validation-test.js    # Comprehensive validation tests
 
 ## 🎮 Usage Examples
 
-### Create Mission (Admin) - NEW API
+### Create Mission (Admin) - UPDATED API
 ```javascript
 const mission = await fetch('/api/missions', {
   method: 'POST',
@@ -276,8 +342,9 @@ const mission = await fetch('/api/missions', {
     description: 'Descrição opcional da missão',  // Optional now!
     category: 'CUSTOM',
     type: 'RECURRING',
-    reward: 100,
-    xpReward: 50,
+    reward: 100,              // DEPRECATED: Use coinsReward instead
+    coinsReward: 100,         // NEW: Coins for store purchases
+    tierPointsReward: 50,     // Tier points for progression (replaces xpReward)
     startDate: '2025-01-10T15:30:00',  // At least one date required
     endDate: '2025-05-20T23:59:00',    // Optional if startDate provided
     requirement: {
@@ -296,7 +363,7 @@ const mission = await fetch('/api/missions', {
       }],
       logic: 'AND'
     },
-    productRewards: [{  // NEW: Physical/Digital rewards
+    productRewards: [{  // Physical/Digital rewards
       productId: 'free_spins_product_id',
       quantity: 1
     }]
@@ -337,10 +404,30 @@ const redemption = await fetch('/api/rewards/product_id/redeem', {
 - **Error Handling**: Comprehensive error messages and recovery
 - **Performance Monitoring**: Real-time validation feedback
 
+## 📊 Admin Dashboard Features
+
+### Real-time Statistics
+- **Dashboard Overview**: Real-time metrics fed from actual database queries
+- **User Analytics**: Active users, new registrations, tier distributions
+- **Mission Performance**: Completion rates, popular missions, reward distributions
+- **Financial Metrics**: Coin circulation, redemption patterns, program ROI
+
+### Management Interfaces
+- **👥 Users Management**: Complete user list with activity status, tier levels, coin balances
+- **🎯 Missions Management**: Create, edit, delete missions with advanced builder
+- **🏆 Programs Management**: Multi-program support with individual analytics
+- **📊 Analytics Dashboard**: Comprehensive business intelligence with real-time data
+
+### Key Admin Features
+- **Inactive Mission Support**: View and manage both active and inactive missions
+- **Data Consistency**: All dashboards pull from same real database sources
+- **Mission Builder**: Advanced mission creation with coins/tier points separation
+- **User Filtering**: Filter users by activity, tier level, registration date
+
 ## 🤝 Integration
 
 This API is designed to integrate with:
-- **Frontend Applications** (alfa-front)  
+- **Frontend Applications** (alfa-front)
 - **Mobile Apps** (React Native, Flutter)
 - **Gaming Platforms** (Sportsbook, Casino)
 - **E-commerce Systems**

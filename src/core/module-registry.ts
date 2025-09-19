@@ -166,12 +166,12 @@ class ModuleRegistry implements IModuleRegistry {
 
     this.modules.forEach((module, name) => {
       stats[name] = {
-        eventTypes: module.eventTypes.length,
-        templates: module.templates.length,
-        validators: module.validators.length,
+        eventTypes: module.eventTypes?.length || 0,
+        templates: module.templates?.length || 0,
+        validators: module.validators?.length || 0,
         version: module.version,
-        hasComponents: Object.keys(module.components).length > 0,
-        hasTranslations: Object.keys(module.translations).length > 0
+        hasComponents: Object.keys(module.components || {}).length > 0,
+        hasTranslations: Object.keys(module.translations || {}).length > 0
       }
     })
 
@@ -220,12 +220,14 @@ class ModuleRegistry implements IModuleRegistry {
     })
 
     // Validate validators
-    module.validators?.forEach((validator, index) => {
-      if (!validator.name) errors.push(`Validator ${index} missing name`)
-      if (!validator.validate || typeof validator.validate !== 'function') {
-        errors.push(`Validator ${index} missing validate function`)
-      }
-    })
+    if (Array.isArray(module.validators)) {
+      module.validators.forEach((validator, index) => {
+        if (!validator.name) errors.push(`Validator ${index} missing name`)
+        if (!validator.validate || typeof validator.validate !== 'function') {
+          errors.push(`Validator ${index} missing validate function`)
+        }
+      })
+    }
 
     // Check for reasonable limits
     if (module.eventTypes.length > 50) {

@@ -18,7 +18,8 @@ export default function NewMissionPage() {
     name?: string
     description?: string
     reward?: number
-    xp?: number
+    coins?: number
+    tierPoints?: number
     startDate?: string
     endDate?: string
     productRewards?: { productId: string; quantity: number }[]
@@ -46,7 +47,8 @@ export default function NewMissionPage() {
         category: mission.module || 'CUSTOM',
         type: 'RECURRING',
         reward: mission.reward ?? 0,
-        xpReward: mission.xp ?? 0,
+        coinsReward: mission.coins ?? 0,
+        tierPointsReward: mission.tierPoints ?? 0,
         requirement: mission.rule || {},
         startDate: mission.startDate,
         endDate: mission.endDate,

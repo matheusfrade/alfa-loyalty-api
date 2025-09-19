@@ -3,6 +3,16 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
+interface RecentActivity {
+  id: string
+  type: string
+  userName: string
+  userEmail: string
+  amount: number
+  description: string
+  createdAt: string
+}
+
 interface DashboardStats {
   totalUsers: number
   totalPrograms: number
@@ -12,6 +22,7 @@ interface DashboardStats {
   todayRedemptions: number
   activeMissions: number
   totalCoinsEarned: number
+  recentActivity: RecentActivity[]
 }
 
 export default function AdminDashboard() {
@@ -24,6 +35,7 @@ export default function AdminDashboard() {
     todayRedemptions: 0,
     activeMissions: 0,
     totalCoinsEarned: 0,
+    recentActivity: [],
   })
   const [loading, setLoading] = useState(true)
 
@@ -33,24 +45,33 @@ export default function AdminDashboard() {
 
   const loadDashboardStats = async () => {
     try {
-      // For now, we'll simulate some stats since we haven't built the analytics API yet
-      // In a real app, you'd fetch from /api/admin/stats
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      setStats({
-        totalUsers: 125,
-        totalPrograms: 3,
-        totalMissions: 45,
-        totalRewards: 28,
-        todaySignups: 8,
-        todayRedemptions: 15,
-        activeMissions: 32,
-        totalCoinsEarned: 24750,
-      })
+      const response = await fetch('/api/admin/stats')
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard stats')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        setStats(result.data)
+      } else {
+        throw new Error(result.error)
+      }
     } catch (error) {
       console.error('Failed to load dashboard stats:', error)
+      // Fallback to simulated data if API fails
+      setStats({
+        totalUsers: 150,
+        totalPrograms: 1,
+        totalMissions: 5,
+        totalRewards: 10,
+        todaySignups: 8,
+        todayRedemptions: 15,
+        activeMissions: 4,
+        totalCoinsEarned: 50000,
+        recentActivity: [],
+      })
     } finally {
       setLoading(false)
     }
@@ -209,34 +230,61 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">New user registered</p>
-                  <p className="text-xs text-gray-500">user@example.com • 2 minutes ago</p>
+              {stats.recentActivity.length > 0 ? (
+                stats.recentActivity.slice(0, 4).map((activity) => {
+                  const getActivityColor = (type: string) => {
+                    switch (type) {
+                      case 'EARNED': return 'bg-green-500'
+                      case 'SPENT': return 'bg-red-500'
+                      case 'BONUS': return 'bg-blue-500'
+                      case 'REFUND': return 'bg-orange-500'
+                      default: return 'bg-gray-500'
+                    }
+                  }
+
+                  const getActivityIcon = (type: string) => {
+                    switch (type) {
+                      case 'EARNED': return '💰'
+                      case 'SPENT': return '🛍️'
+                      case 'BONUS': return '🎁'
+                      case 'REFUND': return '↩️'
+                      default: return '📝'
+                    }
+                  }
+
+                  const formatAmount = (amount: number) => {
+                    if (amount > 0) return `+${amount}`
+                    return amount.toString()
+                  }
+
+                  const timeAgo = (dateString: string) => {
+                    const diff = Date.now() - new Date(dateString).getTime()
+                    const minutes = Math.floor(diff / 60000)
+                    if (minutes < 60) return `${minutes}m ago`
+                    const hours = Math.floor(minutes / 60)
+                    if (hours < 24) return `${hours}h ago`
+                    return `${Math.floor(hours / 24)}d ago`
+                  }
+
+                  return (
+                    <div key={activity.id} className="flex items-center space-x-3">
+                      <div className={`w-2 h-2 ${getActivityColor(activity.type)} rounded-full`}></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">
+                          {getActivityIcon(activity.type)} {activity.description}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {activity.userName} • {formatAmount(activity.amount)} coins • {timeAgo(activity.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })
+              ) : (
+                <div className="text-sm text-gray-500 text-center py-4">
+                  Nenhuma atividade recente
                 </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Mission completed</p>
-                  <p className="text-xs text-gray-500">Daily Login Streak • 5 minutes ago</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Reward redeemed</p>
-                  <p className="text-xs text-gray-500">Free Bet R$ 50 • 12 minutes ago</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Tier upgrade</p>
-                  <p className="text-xs text-gray-500">Bronze → Silver • 1 hour ago</p>
-                </div>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>

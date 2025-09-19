@@ -18,7 +18,7 @@ const DEPOSITS_EVENT_TYPES: EventTypeDefinition[] = [
           { value: 'bank_transfer', label: 'Transferência Bancária' }
         ],
         helper: 'Método de pagamento utilizado' },
-      { name: 'is_first_deposit', label: 'Primeiro Depósito', type: 'boolean', required: false, 
+      { name: 'is_first_deposit', label: 'É Primeiro Depósito', type: 'boolean', required: false,
         helper: 'Se é o primeiro depósito do usuário' },
       { name: 'bonus_applied', label: 'Bônus Aplicado', type: 'boolean', required: false,
         helper: 'Se algum bônus foi aplicado' },
@@ -55,7 +55,7 @@ const DEPOSITS_TRANSLATIONS: ModuleTranslations = {
     'module.description': 'Sistema de missões para depósitos e pagamentos',
     'field.amount': 'Valor',
     'field.payment_method': 'Método de Pagamento',
-    'field.is_first_deposit': 'Primeiro Depósito',
+    'field.is_first_deposit': 'É Primeiro Depósito',
     'field.bonus_applied': 'Bônus Aplicado'
   }
 }

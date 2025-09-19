@@ -1,0 +1,21 @@
+
+> loyalty-api@1.0.0 dev
+> next dev --port 3005
+
+  ▲ Next.js 14.2.0
+  - Local:        http://localhost:3005
+  - Environments: .env.local, .env
+
+ ✓ Starting...
+npm error code ENOWORKSPACES
+npm error This command does not support workspaces.
+npm error A complete log of this run can be found in: /Users/matheusfrade/.npm/_logs/2025-09-18T12_31_49_800Z-debug-0.log
+ ✓ Ready in 2.3s
+ ✓ Compiled /src/middleware in 275ms (165 modules)
+ ○ Compiling /admin/missions/new ...
+ ✓ Compiled /admin/missions/new in 4.5s (701 modules)
+ HEAD /admin/missions/new 200 in 4695ms
+ HEAD /admin/missions/new 200 in 4657ms
+ ✓ Compiled in 170ms (354 modules)
+ GET /admin/missions/new 200 in 23ms
+ GET /admin/missions/new 200 in 17ms

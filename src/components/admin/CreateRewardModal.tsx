@@ -34,6 +34,7 @@ export function CreateRewardModal({ onSuccess }: CreateRewardModalProps) {
       details: '',
     },
     isActive: true,
+    isShopVisible: true,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -265,18 +266,37 @@ export function CreateRewardModal({ onSuccess }: CreateRewardModalProps) {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              id="isActive"
-              type="checkbox"
-              checked={formData.isActive}
-              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              disabled={loading}
-            />
-            <label htmlFor="isActive" className="text-sm font-medium">
-              Active immediately
-            </label>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <input
+                id="isActive"
+                type="checkbox"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                disabled={loading}
+              />
+              <label htmlFor="isActive" className="text-sm font-medium">
+                Active immediately
+              </label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                id="isShopVisible"
+                type="checkbox"
+                checked={formData.isShopVisible}
+                onChange={(e) => setFormData({ ...formData, isShopVisible: e.target.checked })}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                disabled={loading}
+              />
+              <label htmlFor="isShopVisible" className="text-sm font-medium">
+                📦 Available in User Shop
+              </label>
+              <span className="text-xs text-gray-500">
+                (Unchecked = System rewards only)
+              </span>
+            </div>
           </div>
 
           <DialogFooter>

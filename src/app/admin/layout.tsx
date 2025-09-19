@@ -122,6 +122,18 @@ export default function AdminLayout({
                 >
                   Analytics
                 </Link>
+                <Link
+                  href="/admin/tiers"
+                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:border-gray-300 hover:text-gray-700"
+                >
+                  Tiers
+                </Link>
+                <Link
+                  href="/admin/tier-rewards"
+                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:border-gray-300 hover:text-gray-700"
+                >
+                  Tier Rewards
+                </Link>
               </div>
             </div>
             <div className="flex items-center">

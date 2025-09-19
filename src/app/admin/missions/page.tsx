@@ -37,7 +37,7 @@ export default function MissionsPage() {
 
   const loadMissions = async () => {
     try {
-      const response = await fetch('/api/missions')
+      const response = await fetch('/api/missions?includeInactive=true')
       if (response.ok) {
         const data = await response.json()
         setMissions(data.missions || [])

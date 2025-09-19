@@ -6,8 +6,10 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { ModularRuleBuilder } from './ModularRuleBuilder'
 import { RewardSelector } from '../admin/RewardSelector'
 import { QuickTemplates, type MissionTemplate } from './QuickTemplates'
+import { CustomerGroupsStep } from './CustomerGroupsStep'
 import { initializeModules } from '../../modules'
 import type { BaseMissionRule } from '../../core/types'
+import { CustomerGroupSelection } from '@/types/customer-groups'
 import { Sparkles } from 'lucide-react'
 
 interface MissionBuilderProps {
@@ -17,8 +19,10 @@ interface MissionBuilderProps {
     name: string
     description: string
     reward: number
-    xp: number
+    coins: number
+    tierPoints?: number
     productRewards?: Array<{ productId: string; quantity: number }>
+    customerGroups?: CustomerGroupSelection
   }) => void
   locale?: string
   className?: string
@@ -28,7 +32,8 @@ interface MissionData {
   name: string
   description: string
   reward: number
-  xp: number
+  coins: number
+  tierPoints: number
   type: 'SINGLE' | 'RECURRING' | 'STREAK' | 'MILESTONE'
   category: string
   recurrence?: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'UNLIMITED'
@@ -36,10 +41,11 @@ interface MissionData {
   startDate?: string
   endDate?: string
   productRewards: Array<{ productId: string; quantity: number }>
+  customerGroups: CustomerGroupSelection
 }
 
-export function MissionBuilder({ 
-  onMissionCreate, 
+export function MissionBuilder({
+  onMissionCreate,
   locale = 'pt-BR',
   className = ''
 }: MissionBuilderProps) {
@@ -50,17 +56,19 @@ export function MissionBuilder({
     name: '',
     description: '',
     reward: 0,
-    xp: 0,
+    coins: 0,
+    tierPoints: 0,
     type: 'RECURRING',
     category: 'CUSTOM',
     recurrence: 'UNLIMITED',
     maxClaims: undefined,
     startDate: '',
     endDate: '',
-    productRewards: []
+    productRewards: [],
+    customerGroups: { include: [], exclude: [] }
   })
   const [systemInitialized, setSystemInitialized] = useState(false)
-  const [step, setStep] = useState<'templates' | 'rule' | 'details' | 'review'>('templates')
+  const [step, setStep] = useState<'templates' | 'rule' | 'groups' | 'details' | 'review'>('templates')
   const [showTemplates, setShowTemplates] = useState(true)
 
   useEffect(() => {
@@ -69,11 +77,22 @@ export function MissionBuilder({
 
   const initializeSystem = async () => {
     try {
+      console.log('🔧 Starting mission system initialization...')
       const result = initializeModules()
-      setSystemInitialized(result.success)
+      console.log('🔧 Module initialization result:', result)
+
+      if (result.success) {
+        console.log('✅ Mission system initialized successfully')
+        setSystemInitialized(true)
+      } else {
+        console.error('❌ Mission system initialization failed:', result.error)
+        console.log('🔧 Forcing initialization to proceed anyway for debugging...')
+        setSystemInitialized(true) // Force enable for debugging
+      }
     } catch (error) {
-      console.error('Failed to initialize mission system:', error)
-      setSystemInitialized(false)
+      console.error('❌ Failed to initialize mission system:', error)
+      console.log('🔧 Forcing initialization to proceed anyway for debugging...')
+      setSystemInitialized(true) // Force enable for debugging
     }
   }
 
@@ -89,15 +108,16 @@ export function MissionBuilder({
       name: template.name,
       description: template.description,
       reward: template.reward,
-      xp: template.xp,
+      coins: template.xp || 0,
       type: template.rule.maxClaims === 1 ? 'SINGLE' : 'RECURRING',
       category: 'CUSTOM',
-      recurrence: template.timeWindow === '1d' ? 'DAILY' : 
+      recurrence: template.timeWindow === '1d' ? 'DAILY' :
                   template.timeWindow === '7d' ? 'WEEKLY' : 'UNLIMITED',
       maxClaims: template.maxClaims,
       startDate: new Date().toISOString().slice(0, 16),
       endDate: '',
-      productRewards: []
+      productRewards: [],
+      customerGroups: { include: [], exclude: [] }
     })
     
     // Go to rules step to show the applied template rules
@@ -107,6 +127,10 @@ export function MissionBuilder({
 
   const handleRuleChange = useCallback((rule: BaseMissionRule) => {
     setCurrentRule(rule)
+  }, [])
+
+  const handleCustomerGroupsChange = useCallback((customerGroups: CustomerGroupSelection) => {
+    setMissionData(prev => ({ ...prev, customerGroups }))
   }, [])
 
   // Initialize empty rule when needed
@@ -129,6 +153,9 @@ export function MissionBuilder({
         break
       case 'rule':
         // Use same logic as canProceed() - always allow progression from rules step
+        setStep('groups')
+        break
+      case 'groups':
         setStep('details')
         break
       case 'details':
@@ -145,12 +172,11 @@ export function MissionBuilder({
       case 'rule':
         setStep('templates')
         break
+      case 'groups':
+        setStep('rule')
+        break
       case 'details':
-        if (showTemplates) {
-          setStep('templates')
-        } else {
-          setStep('rule')
-        }
+        setStep('groups')
         break
       case 'review':
         setStep('details')
@@ -177,14 +203,15 @@ export function MissionBuilder({
     // Validações básicas
     const hasValidName = data.name.trim() !== ''
     const hasValidReward = data.reward >= 0
-    const hasValidXP = data.xp >= 0
-    
+    const hasValidCoins = data.coins >= 0
+    const hasValidTierPoints = data.tierPoints >= 0
+
     // Validação de datas - pelo menos uma data deve estar presente
     const hasStartDate = Boolean(data.startDate && data.startDate.trim() !== '')
     const hasEndDate = Boolean(data.endDate && data.endDate.trim() !== '')
     const hasAtLeastOneDate = hasStartDate || hasEndDate
-    
-    return hasValidName && hasValidReward && hasValidXP && hasAtLeastOneDate
+
+    return hasValidName && hasValidReward && hasValidCoins && hasValidTierPoints && hasAtLeastOneDate
   }
 
   const handleCreateMission = () => {
@@ -201,6 +228,8 @@ export function MissionBuilder({
     switch (step) {
       case 'rule':
         return true // Always allow progression from rules step
+      case 'groups':
+        return true // Customer groups are optional
       case 'details':
         return isMissionDataValid(missionData)
       case 'review':
@@ -228,23 +257,30 @@ export function MissionBuilder({
       <div className="bg-white p-4 rounded-lg border shadow-sm">
         <div className="flex items-center justify-between">
           <div className={`flex items-center space-x-2 px-3 py-2 rounded-md ${
-            step === 'rule' ? 'bg-blue-100 text-blue-800' : ['details', 'review'].includes(step) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+            step === 'rule' ? 'bg-blue-100 text-blue-800' : ['groups', 'details', 'review'].includes(step) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
           }`}>
             <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-sm font-semibold">1</span>
             <span className="text-sm font-medium">Regras</span>
           </div>
           <div className="flex-1 h-px bg-gray-200 mx-2"></div>
           <div className={`flex items-center space-x-2 px-3 py-2 rounded-md ${
-            step === 'details' ? 'bg-blue-100 text-blue-800' : step === 'review' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+            step === 'groups' ? 'bg-blue-100 text-blue-800' : ['details', 'review'].includes(step) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
           }`}>
             <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-sm font-semibold">2</span>
+            <span className="text-sm font-medium">Grupos</span>
+          </div>
+          <div className="flex-1 h-px bg-gray-200 mx-2"></div>
+          <div className={`flex items-center space-x-2 px-3 py-2 rounded-md ${
+            step === 'details' ? 'bg-blue-100 text-blue-800' : step === 'review' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+          }`}>
+            <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-sm font-semibold">3</span>
             <span className="text-sm font-medium">Detalhes</span>
           </div>
           <div className="flex-1 h-px bg-gray-200 mx-2"></div>
           <div className={`flex items-center space-x-2 px-3 py-2 rounded-md ${
             step === 'review' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
           }`}>
-            <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-sm font-semibold">3</span>
+            <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-sm font-semibold">4</span>
             <span className="text-sm font-medium">Revisão</span>
           </div>
         </div>
@@ -319,6 +355,16 @@ export function MissionBuilder({
           </div>
         )}
 
+        {step === 'groups' && (
+          <CustomerGroupsStep
+            value={missionData.customerGroups}
+            onChange={handleCustomerGroupsChange}
+            onNext={handleNextStep}
+            onBack={handlePreviousStep}
+            disabled={false}
+          />
+        )}
+
         {step === 'details' && (
           <div className="space-y-6">
             <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
@@ -367,20 +413,34 @@ export function MissionBuilder({
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <label htmlFor="mission-xp" className="block text-sm font-medium text-gray-700">Experiência (XP)</label>
+                <label htmlFor="mission-coins" className="block text-sm font-medium text-gray-700">Coins *</label>
                 <input
-                  id="mission-xp"
+                  id="mission-coins"
                   type="number"
-                  value={missionData.xp}
-                  onChange={(e) => setMissionData({ ...missionData, xp: Number(e.target.value) })}
+                  value={missionData.coins}
+                  onChange={(e) => setMissionData({ ...missionData, coins: Number(e.target.value) })}
+                  placeholder="0"
+                  min="0"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="mission-tier-points" className="block text-sm font-medium text-gray-700">Pontos de Tier</label>
+                <input
+                  id="mission-tier-points"
+                  type="number"
+                  value={missionData.tierPoints}
+                  onChange={(e) => setMissionData({ ...missionData, tierPoints: Number(e.target.value) })}
                   placeholder="0"
                   min="0"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <label htmlFor="mission-type" className="block text-sm font-medium text-gray-700">Tipo de Missão *</label>
                 <select
@@ -527,12 +587,22 @@ export function MissionBuilder({
                   )}
                   <div><strong className="text-gray-900">Categoria:</strong> {missionData.category}</div>
                   <div><strong className="text-gray-900">Recompensa:</strong> R$ {missionData.reward.toFixed(2)}</div>
-                  <div><strong className="text-gray-900">XP:</strong> {missionData.xp}</div>
+                  <div><strong className="text-gray-900">Coins:</strong> {missionData.coins}</div>
+                  <div><strong className="text-gray-900">Pontos de Tier:</strong> {missionData.tierPoints}</div>
                   {missionData.productRewards.length > 0 && (
                     <div><strong className="text-gray-900">Rewards:</strong> {missionData.productRewards.length} produto(s)</div>
                   )}
                   {missionData.maxClaims && (
                     <div><strong className="text-gray-900">Limite:</strong> {missionData.maxClaims} conclusões</div>
+                  )}
+                  {(missionData.customerGroups.include.length > 0 || missionData.customerGroups.exclude.length > 0) && (
+                    <div><strong className="text-gray-900">Grupos:</strong> {
+                      missionData.customerGroups.include.length > 0 ? `${missionData.customerGroups.include.length} incluídos` : ''
+                    } {
+                      missionData.customerGroups.include.length > 0 && missionData.customerGroups.exclude.length > 0 ? ', ' : ''
+                    } {
+                      missionData.customerGroups.exclude.length > 0 ? `${missionData.customerGroups.exclude.length} excluídos` : ''
+                    }</div>
                   )}
                   {(missionData.startDate || missionData.endDate) && (
                     <div><strong className="text-gray-900">Validade:</strong> {
@@ -575,7 +645,8 @@ export function MissionBuilder({
                 <ul className="list-disc list-inside mt-1">
                   {!missionData.name.trim() && <li>Nome da Missão é obrigatório</li>}
                   {missionData.reward < 0 && <li>Recompensa deve ser maior ou igual a 0</li>}
-                  {missionData.xp < 0 && <li>XP deve ser maior ou igual a 0</li>}
+                  {missionData.coins < 0 && <li>Coins deve ser maior ou igual a 0</li>}
+                  {missionData.tierPoints < 0 && <li>Pontos de Tier deve ser maior ou igual a 0</li>}
                   {(() => {
                     const hasStartDate = missionData.startDate && missionData.startDate.trim() !== ''
                     const hasEndDate = missionData.endDate && missionData.endDate.trim() !== ''

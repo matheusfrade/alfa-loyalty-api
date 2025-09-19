@@ -6,7 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { MissionBuilder } from '@/components/mission-builder'
 import { ModularRuleBuilder } from '@/components/mission-builder/ModularRuleBuilder'
+import { RewardSelector } from '@/components/admin/RewardSelector'
+import { CustomerGroupsStep } from '@/components/mission-builder/CustomerGroupsStep'
 import { BaseMissionRule } from '@/core/types'
+import { CustomerGroupSelection } from '@/types/customer-groups'
 import { ArrowLeft, Save, Settings, ChevronDown, ChevronRight } from 'lucide-react'
 
 interface Mission {
@@ -17,6 +20,7 @@ interface Mission {
   type: string
   reward: number
   xpReward: number
+  tierPointsReward?: number
   requirement?: any
   metadata?: any
   startDate?: string
@@ -43,23 +47,7 @@ export default function EditMissionPage({ params }: { params: { id: string } }) 
   const [mission, setMission] = useState<Mission | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [mode, setMode] = useState<'simple' | 'modular'>('simple')
-  const [showAdvanced, setShowAdvanced] = useState(false)
-  const [advancedRule, setAdvancedRule] = useState<BaseMissionRule | null>(null)
-
-  // Form state for simple mode
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: '',
-    type: '',
-    reward: 0,
-    xpReward: 0,
-    startDate: '',
-    endDate: '',
-    maxClaims: 0,
-    order: 0,
-  })
+  const [useFullBuilder, setUseFullBuilder] = useState(false)
 
   useEffect(() => {
     loadMission()
@@ -71,32 +59,9 @@ export default function EditMissionPage({ params }: { params: { id: string } }) 
       if (response.ok) {
         const data = await response.json()
         setMission(data)
-        
-        // Check if mission was created with modular system
-        if (data.metadata?.created_with === 'modular_system') {
-          setMode('modular')
-        } else {
-          setMode('simple')
-        }
 
-        // Initialize form data
-        setFormData({
-          title: data.title || '',
-          description: data.description || '',
-          category: data.category || '',
-          type: data.type || '',
-          reward: data.reward || 0,
-          xpReward: data.xpReward || 0,
-          startDate: data.startDate ? new Date(data.startDate).toISOString().slice(0, 16) : '',
-          endDate: data.endDate ? new Date(data.endDate).toISOString().slice(0, 16) : '',
-          maxClaims: data.maxClaims || 0,
-          order: data.order || 0,
-        })
-
-        // Initialize advanced rule if it exists
-        if (data.requirement && typeof data.requirement === 'object') {
-          setAdvancedRule(data.requirement)
-        }
+        // Check if user wants to use full builder for advanced editing
+        setUseFullBuilder(data.metadata?.created_with === 'modular_system' || false)
       } else {
         alert('Erro ao carregar missão')
         router.push('/admin/missions')
@@ -110,35 +75,35 @@ export default function EditMissionPage({ params }: { params: { id: string } }) 
     }
   }
 
-  const handleModularUpdate = async (updatedMission: {
-    module?: string
-    rule?: BaseMissionRule
-    name?: string
-    description?: string
-    reward?: number
-    xp?: number
-    startDate?: string
-    endDate?: string
-    productRewards?: { productId: string; quantity: number }[]
+  const handleFullBuilderUpdate = async (updatedMission: {
+    module: string
+    rule: BaseMissionRule
+    name: string
+    description: string
+    reward: number
+    coins: number
+    tierPoints?: number
+    productRewards?: Array<{ productId: string; quantity: number }>
+    customerGroups?: any
   }) => {
     if (!mission) return
 
     setSaving(true)
     try {
-      console.log('🔄 Updating mission:', mission.id, updatedMission)
-      
+      console.log('🔄 Updating mission with full builder:', mission.id, updatedMission)
+
       const missionData = {
-        title: updatedMission.name || mission.title,
-        description: updatedMission.description || mission.description,
-        reward: updatedMission.reward ?? mission.reward,
-        xpReward: updatedMission.xp ?? mission.xpReward,
-        requirement: updatedMission.rule || mission.requirement,
-        startDate: updatedMission.startDate,
-        endDate: updatedMission.endDate,
-        productRewards: updatedMission.productRewards,
+        title: updatedMission.name,
+        description: updatedMission.description,
+        reward: updatedMission.reward,
+        xpReward: updatedMission.coins,
+        tierPointsReward: updatedMission.tierPoints || 0,
+        requirement: updatedMission.rule,
+        productRewards: updatedMission.productRewards || [],
         metadata: {
           ...mission.metadata,
-          module: updatedMission.module || mission.metadata?.module,
+          module: updatedMission.module,
+          customerGroups: updatedMission.customerGroups,
           updated_with: 'modular_system',
           updated_at: new Date().toISOString()
         }
@@ -168,35 +133,8 @@ export default function EditMissionPage({ params }: { params: { id: string } }) 
     }
   }
 
-  const handleSimpleUpdate = async () => {
-    if (!mission) return
-
-    setSaving(true)
-    try {
-      const response = await fetch(`/api/missions/${mission.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          startDate: formData.startDate || undefined,
-          endDate: formData.endDate || undefined,
-          requirement: advancedRule || mission.requirement,
-        }),
-      })
-
-      if (response.ok) {
-        router.push('/admin/missions')
-      } else {
-        const error = await response.json()
-        alert('Erro ao atualizar missão: ' + (error.message || 'Erro desconhecido'))
-      }
-    } catch (error) {
-      alert('Erro ao atualizar missão: ' + error)
-    } finally {
-      setSaving(false)
-    }
+  const toggleEditMode = () => {
+    setUseFullBuilder(!useFullBuilder)
   }
 
   if (loading) {
@@ -240,277 +178,56 @@ export default function EditMissionPage({ params }: { params: { id: string } }) 
         </div>
       </div>
 
-      {/* Edit Form Card */}
+      {/* Edit Mode Selection */}
       <Card>
         <CardHeader>
           <CardTitle>✏️ {mission.title}</CardTitle>
           <CardDescription>
-            {mode === 'modular' 
-              ? 'Edite a missão usando o sistema modular'
-              : 'Edite os detalhes da missão'
-            }
+            Escolha o modo de edição para atualizar sua missão
           </CardDescription>
-          {mode === 'simple' && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
-              <p className="text-sm text-blue-800">
-                💡 Esta missão foi criada no modo simples. Para usar recursos avançados, 
-                recrie a missão usando o sistema modular.
-              </p>
-            </div>
-          )}
+
+          <div className="flex gap-4 mt-4">
+            <Button
+              variant={!useFullBuilder ? 'default' : 'outline'}
+              onClick={() => setUseFullBuilder(false)}
+              className="flex-1"
+            >
+              📝 Edição Simples
+            </Button>
+            <Button
+              variant={useFullBuilder ? 'default' : 'outline'}
+              onClick={() => setUseFullBuilder(true)}
+              className="flex-1"
+            >
+              🛠️ Edição Completa (Rewards, Grupos, etc.)
+            </Button>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
+            <p className="text-sm text-blue-800">
+              {!useFullBuilder ? (
+                <><strong>Edição Simples:</strong> Edite apenas campos básicos como nome, descrição e recompensas simples.</>
+              ) : (
+                <><strong>Edição Completa:</strong> Acesso total ao sistema modular com triggers, rewards de produtos, grupos de clientes e configurações avançadas.</>
+              )}
+            </p>
+          </div>
         </CardHeader>
         <CardContent>
-          {mode === 'modular' ? (
-            <MissionBuilder
-              onMissionCreate={handleModularUpdate}
+          {useFullBuilder ? (
+            <MissionEditor
+              mission={mission}
+              onMissionUpdate={handleFullBuilderUpdate}
               locale="pt-BR"
             />
           ) : (
-            <div className="space-y-6">
-              {/* Simple form with all fields */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                    Título
-                  </label>
-                  <input
-                    id="title"
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-                    Categoria
-                  </label>
-                  <select
-                    id="category"
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="DAILY">Diária</option>
-                    <option value="BETTING">Apostas</option>
-                    <option value="TUTORIAL">Tutorial</option>
-                    <option value="DEPOSIT">Depósito</option>
-                    <option value="SPECIAL">Especial</option>
-                    <option value="CUSTOM">Personalizada</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-                    Tipo
-                  </label>
-                  <select
-                    id="type"
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="SINGLE">Única</option>
-                    <option value="RECURRING">Recorrente</option>
-                    <option value="STREAK">Sequência</option>
-                    <option value="MILESTONE">Marco</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="reward" className="block text-sm font-medium text-gray-700 mb-1">
-                    Recompensa (coins)
-                  </label>
-                  <input
-                    id="reward"
-                    type="number"
-                    value={formData.reward}
-                    onChange={(e) => setFormData({ ...formData, reward: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="xpReward" className="block text-sm font-medium text-gray-700 mb-1">
-                    XP
-                  </label>
-                  <input
-                    id="xpReward"
-                    type="number"
-                    value={formData.xpReward}
-                    onChange={(e) => setFormData({ ...formData, xpReward: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="maxClaims" className="block text-sm font-medium text-gray-700 mb-1">
-                    Máximo de Resgates
-                  </label>
-                  <input
-                    id="maxClaims"
-                    type="number"
-                    value={formData.maxClaims}
-                    onChange={(e) => setFormData({ ...formData, maxClaims: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
-                    Data de Início
-                  </label>
-                  <input
-                    id="startDate"
-                    type="datetime-local"
-                    value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
-                    Data de Término
-                  </label>
-                  <input
-                    id="endDate"
-                    type="datetime-local"
-                    value={formData.endDate}
-                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="order" className="block text-sm font-medium text-gray-700 mb-1">
-                    Ordem de Exibição
-                  </label>
-                  <input
-                    id="order"
-                    type="number"
-                    value={formData.order}
-                    onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrição
-                </label>
-                <textarea
-                  id="description"
-                  rows={4}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Advanced Rules Section */}
-              <div className="border-t pt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-gray-600" />
-                    <h3 className="text-lg font-medium text-gray-900">Regras Avançadas</h3>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowAdvanced(!showAdvanced)}
-                    className="gap-2"
-                  >
-                    {showAdvanced ? (
-                      <>
-                        <ChevronDown className="h-4 w-4" />
-                        Ocultar
-                      </>
-                    ) : (
-                      <>
-                        <ChevronRight className="h-4 w-4" />
-                        Configurar Triggers e Condições
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                {showAdvanced && (
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                    <div className="text-sm text-gray-700 mb-4">
-                      <p className="mb-2">Configure quando e como esta missão será ativada:</p>
-                      <ul className="list-disc list-inside space-y-1 text-gray-600">
-                        <li><strong>Triggers:</strong> Eventos que iniciam a missão (ex: fazer aposta, fazer login)</li>
-                        <li><strong>Conditions:</strong> Condições que devem ser atendidas (ex: valor mínimo, categoria)</li>
-                      </ul>
-                    </div>
-
-                    <ModularRuleBuilder
-                      moduleName="igaming"
-                      initialRule={advancedRule || undefined}
-                      onRuleChange={(rule) => setAdvancedRule(rule)}
-                      locale="pt-BR"
-                      className="bg-white rounded-lg"
-                    />
-
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <p className="text-sm text-blue-800">
-                        💡 <strong>Dica:</strong> Se você não configurar regras específicas, a missão será ativada manualmente ou por eventos padrão do sistema.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Product Rewards */}
-              {mission.productRewards && mission.productRewards.length > 0 && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">🎁 Recompensas de Produtos</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {mission.productRewards.map((reward) => (
-                      <div key={reward.product.id} className="flex items-center gap-1 px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm">
-                        <span>{reward.quantity}x</span>
-                        <span>{reward.product.name}</span>
-                        {reward.product.image && (
-                          <img src={reward.product.image} alt={reward.product.name} className="w-5 h-5 rounded-full ml-1" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Para modificar as recompensas de produtos, recrie a missão usando o sistema modular.
-                  </p>
-                </div>
-              )}
-
-              {/* Action buttons */}
-              <div className="flex justify-end gap-3 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => router.push('/admin/missions')}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleSimpleUpdate}
-                  disabled={saving}
-                  className="gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  {saving ? 'Salvando...' : 'Salvar Alterações'}
-                </Button>
-              </div>
-            </div>
+            <SimpleEditForm mission={mission} onSave={handleFullBuilderUpdate} />
           )}
         </CardContent>
       </Card>
 
       {/* Saving overlay */}
-      {saving && mode === 'modular' && (
+      {saving && useFullBuilder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -518,6 +235,499 @@ export default function EditMissionPage({ params }: { params: { id: string } }) 
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// Simple Edit Form Component
+function SimpleEditForm({ mission, onSave }: { mission: Mission, onSave: any }) {
+  const router = useRouter()
+  const [saving, setSaving] = useState(false)
+  const [formData, setFormData] = useState({
+    name: mission.title || '',
+    description: mission.description || '',
+    reward: mission.reward || 0,
+    coins: mission.xpReward || 0,
+    tierPoints: mission.tierPointsReward || 0,
+  })
+
+  const handleSimpleSave = async () => {
+    setSaving(true)
+    try {
+      // Convert simple form data to the format expected by handleFullBuilderUpdate
+      const missionData = {
+        module: 'igaming',
+        rule: {
+          triggers: mission.requirement?.triggers || [],
+          conditions: mission.requirement?.conditions || [],
+          logic: mission.requirement?.logic || 'AND'
+        } as BaseMissionRule,
+        name: formData.name,
+        description: formData.description,
+        reward: formData.reward,
+        coins: formData.coins,
+        tierPoints: formData.tierPoints,
+        productRewards: mission.productRewards?.map(pr => ({
+          productId: pr.productId,
+          quantity: pr.quantity
+        })) || [],
+        customerGroups: mission.metadata?.customerGroups || { include: [], exclude: [] }
+      }
+
+      await onSave(missionData)
+    } catch (error) {
+      console.error('Error saving simple mission:', error)
+      alert('Erro ao salvar missão: ' + error)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Basic Fields */}
+      <div className="grid grid-cols-1 gap-4">
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            Nome da Missão
+          </label>
+          <input
+            id="name"
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Digite o nome da missão"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            Descrição
+          </label>
+          <textarea
+            id="description"
+            rows={3}
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Descreva o que o usuário precisa fazer"
+          />
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label htmlFor="reward" className="block text-sm font-medium text-gray-700 mb-1">
+              🪙 Recompensa (coins)
+            </label>
+            <input
+              id="reward"
+              type="number"
+              min="0"
+              value={formData.reward}
+              onChange={(e) => setFormData({ ...formData, reward: Number(e.target.value) })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="coins" className="block text-sm font-medium text-gray-700 mb-1">
+              ⭐ XP
+            </label>
+            <input
+              id="coins"
+              type="number"
+              min="0"
+              value={formData.coins}
+              onChange={(e) => setFormData({ ...formData, coins: Number(e.target.value) })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="tierPoints" className="block text-sm font-medium text-gray-700 mb-1">
+              🎯 Pontos de Tier
+            </label>
+            <input
+              id="tierPoints"
+              type="number"
+              min="0"
+              value={formData.tierPoints}
+              onChange={(e) => setFormData({ ...formData, tierPoints: Number(e.target.value) })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Current Settings Display */}
+      <div className="bg-gray-50 rounded-lg p-4">
+        <h3 className="text-sm font-medium text-gray-700 mb-3">📋 Configurações Atuais</h3>
+        <div className="space-y-2 text-sm">
+          <div><strong>Categoria:</strong> {mission.category}</div>
+          <div><strong>Tipo:</strong> {mission.type}</div>
+          {mission.maxClaims && <div><strong>Máximo de Resgates:</strong> {mission.maxClaims}</div>}
+          {mission.startDate && <div><strong>Data de Início:</strong> {new Date(mission.startDate).toLocaleDateString('pt-BR')}</div>}
+          {mission.endDate && <div><strong>Data de Fim:</strong> {new Date(mission.endDate).toLocaleDateString('pt-BR')}</div>}
+        </div>
+        <p className="text-xs text-blue-600 mt-2">
+          💡 Para modificar essas configurações, use a "Edição Completa"
+        </p>
+      </div>
+
+      {/* Product Rewards */}
+      {mission.productRewards && mission.productRewards.length > 0 && (
+        <div className="bg-green-50 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">🎁 Recompensas de Produtos</h3>
+          <div className="flex flex-wrap gap-2">
+            {mission.productRewards.map((reward) => (
+              <div key={reward.product.id} className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                <span>{reward.quantity}x</span>
+                <span>{reward.product.name}</span>
+                {reward.product.image && (
+                  <img src={reward.product.image} alt={reward.product.name} className="w-5 h-5 rounded-full ml-1" />
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-blue-600 mt-2">
+            💡 Para modificar recompensas de produtos, use a "Edição Completa"
+          </p>
+        </div>
+      )}
+
+      {/* Action buttons */}
+      <div className="flex justify-end gap-3 pt-4 border-t">
+        <Button
+          variant="outline"
+          onClick={() => router.push('/admin/missions')}
+          disabled={saving}
+        >
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleSimpleSave}
+          disabled={saving || !formData.name.trim()}
+          className="gap-2"
+        >
+          <Save className="h-4 w-4" />
+          {saving ? 'Salvando...' : 'Salvar Alterações'}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// Mission Editor Component - Skips template selection for editing
+function MissionEditor({ mission, onMissionUpdate, locale }: {
+  mission: Mission,
+  onMissionUpdate: any,
+  locale?: string
+}) {
+  const [currentStep, setCurrentStep] = useState<'rule' | 'groups' | 'details' | 'review'>('rule')
+  const [saving, setSaving] = useState(false)
+
+  // Initialize with mission data
+  const [currentRule, setCurrentRule] = useState<BaseMissionRule>(() => {
+    const requirement = mission.requirement
+    if (requirement && typeof requirement === 'object') {
+      return {
+        triggers: requirement.triggers || [],
+        conditions: requirement.conditions || [],
+        logic: requirement.logic || 'AND'
+      }
+    }
+    return {
+      triggers: [],
+      conditions: [],
+      logic: 'AND'
+    }
+  })
+
+  const [missionData, setMissionData] = useState({
+    name: mission.title || '',
+    description: mission.description || '',
+    reward: mission.reward || 0,
+    coins: mission.xpReward || 0,
+    tierPoints: mission.tierPointsReward || 0,
+    productRewards: mission.productRewards?.map(pr => ({
+      productId: pr.productId,
+      quantity: pr.quantity
+    })) || [],
+    customerGroups: mission.metadata?.customerGroups || { include: [], exclude: [] }
+  })
+
+  const handleNext = () => {
+    switch (currentStep) {
+      case 'rule':
+        setCurrentStep('groups')
+        break
+      case 'groups':
+        setCurrentStep('details')
+        break
+      case 'details':
+        setCurrentStep('review')
+        break
+      case 'review':
+        handleSave()
+        break
+    }
+  }
+
+  const handlePrevious = () => {
+    switch (currentStep) {
+      case 'groups':
+        setCurrentStep('rule')
+        break
+      case 'details':
+        setCurrentStep('groups')
+        break
+      case 'review':
+        setCurrentStep('details')
+        break
+    }
+  }
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const updatedMission = {
+        module: 'igaming',
+        rule: currentRule,
+        name: missionData.name,
+        description: missionData.description,
+        reward: missionData.reward,
+        coins: missionData.coins,
+        tierPoints: missionData.tierPoints,
+        productRewards: missionData.productRewards,
+        customerGroups: missionData.customerGroups
+      }
+
+      await onMissionUpdate(updatedMission)
+    } catch (error) {
+      console.error('Error saving mission:', error)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const getStepTitle = () => {
+    switch (currentStep) {
+      case 'rule': return 'Configurar Regras'
+      case 'groups': return 'Grupos de Clientes'
+      case 'details': return 'Detalhes da Missão'
+      case 'review': return 'Revisão Final'
+      default: return 'Editar Missão'
+    }
+  }
+
+  const canProceed = () => {
+    switch (currentStep) {
+      case 'rule': return true // Rules are optional
+      case 'groups': return true // Groups are optional
+      case 'details': return missionData.name.trim() !== ''
+      case 'review': return true
+      default: return false
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Progress indicator */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-8">
+          {[
+            { key: 'rule', label: 'Regras', number: 1 },
+            { key: 'groups', label: 'Grupos', number: 2 },
+            { key: 'details', label: 'Detalhes', number: 3 },
+            { key: 'review', label: 'Revisão', number: 4 }
+          ].map((step) => (
+            <div key={step.key} className="flex items-center">
+              <div className={`
+                w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                ${currentStep === step.key
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-600'
+                }
+              `}>
+                {step.number}
+              </div>
+              <span className={`ml-2 text-sm font-medium ${
+                currentStep === step.key ? 'text-blue-600' : 'text-gray-500'
+              }`}>
+                {step.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Step title */}
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold text-gray-900">{getStepTitle()}</h3>
+      </div>
+
+      {/* Step content */}
+      <div className="min-h-[400px]">
+        {currentStep === 'rule' && (
+          <ModularRuleBuilder
+            moduleName="igaming"
+            initialRule={currentRule}
+            onRuleChange={setCurrentRule}
+            locale={locale}
+          />
+        )}
+
+        {currentStep === 'groups' && (
+          <CustomerGroupsStep
+            value={missionData.customerGroups}
+            onChange={(groups) =>
+              setMissionData(prev => ({ ...prev, customerGroups: groups }))
+            }
+            onNext={() => setCurrentStep('details')}
+            onBack={() => setCurrentStep('rule')}
+          />
+        )}
+
+        {currentStep === 'details' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome da Missão
+                </label>
+                <input
+                  type="text"
+                  value={missionData.name}
+                  onChange={(e) => setMissionData(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Digite o nome da missão"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descrição
+                </label>
+                <textarea
+                  rows={3}
+                  value={missionData.description}
+                  onChange={(e) => setMissionData(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Descreva o que o usuário precisa fazer"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    🪙 Recompensa (coins)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={missionData.reward}
+                    onChange={(e) => setMissionData(prev => ({ ...prev, reward: Number(e.target.value) }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    ⭐ XP
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={missionData.coins}
+                    onChange={(e) => setMissionData(prev => ({ ...prev, coins: Number(e.target.value) }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    🎯 Pontos de Tier
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={missionData.tierPoints}
+                    onChange={(e) => setMissionData(prev => ({ ...prev, tierPoints: Number(e.target.value) }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <RewardSelector
+              selectedRewards={missionData.productRewards}
+              onRewardsChange={(rewards) =>
+                setMissionData(prev => ({ ...prev, productRewards: rewards }))
+              }
+            />
+          </div>
+        )}
+
+        {currentStep === 'review' && (
+          <div className="space-y-6">
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h4 className="text-lg font-medium text-gray-900 mb-4">Resumo da Missão</h4>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h5 className="font-medium text-gray-700 mb-2">Informações Básicas</h5>
+                  <div className="space-y-1 text-sm">
+                    <div><strong>Nome:</strong> {missionData.name}</div>
+                    <div><strong>Descrição:</strong> {missionData.description}</div>
+                    <div><strong>Recompensa:</strong> {missionData.reward} coins</div>
+                    <div><strong>XP:</strong> {missionData.coins}</div>
+                    <div><strong>Tier Points:</strong> {missionData.tierPoints}</div>
+                  </div>
+                </div>
+
+                <div>
+                  <h5 className="font-medium text-gray-700 mb-2">Configurações</h5>
+                  <div className="space-y-1 text-sm">
+                    <div><strong>Triggers:</strong> {currentRule.triggers?.length || 0} trigger(s)</div>
+                    <div><strong>Condições:</strong> {currentRule.conditions?.length || 0} condição(ões)</div>
+                    <div><strong>Recompensas de Produtos:</strong> {missionData.productRewards?.length || 0} produto(s)</div>
+                    <div><strong>Grupos:</strong> {(missionData.customerGroups?.include?.length || 0) + (missionData.customerGroups?.exclude?.length || 0)} configurado(s)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Navigation buttons */}
+      <div className="flex justify-between pt-4 border-t">
+        <Button
+          variant="outline"
+          onClick={handlePrevious}
+          disabled={currentStep === 'rule' || saving}
+        >
+          Anterior
+        </Button>
+
+        <Button
+          onClick={handleNext}
+          disabled={!canProceed() || saving}
+          className="gap-2"
+        >
+          {saving ? (
+            <>Salvando...</>
+          ) : currentStep === 'review' ? (
+            <>
+              <Save className="h-4 w-4" />
+              Salvar Alterações
+            </>
+          ) : (
+            'Próximo'
+          )}
+        </Button>
+      </div>
     </div>
   )
 }

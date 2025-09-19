@@ -10,6 +10,8 @@ const getRewardsSchema = z.object({
   minPrice: z.union([z.string(), z.number()]).transform(Number).optional(),
   maxPrice: z.union([z.string(), z.number()]).transform(Number).optional(),
   inStock: z.union([z.string(), z.boolean()]).transform(value => value === 'true' || value === true).optional(),
+  includeSystemOnly: z.union([z.string(), z.boolean()]).transform(value => value === 'true' || value === true).default(false),
+  shopVisibility: z.enum(['shop', 'system', 'all']).default('shop'),
   sortBy: z.enum(['price', 'name', 'createdAt', 'order']).default('order'),
   sortOrder: z.enum(['asc', 'desc']).default('asc'),
   limit: z.union([z.string(), z.number()]).transform(Number).default(20),
@@ -38,17 +40,19 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url)
     const searchParams = Object.fromEntries(url.searchParams.entries())
-    const { 
-      programId, 
-      category, 
+    const {
+      programId,
+      category,
       tierLevel,
-      minPrice, 
-      maxPrice, 
-      inStock, 
-      sortBy, 
-      sortOrder, 
-      limit, 
-      offset 
+      minPrice,
+      maxPrice,
+      inStock,
+      includeSystemOnly,
+      shopVisibility,
+      sortBy,
+      sortOrder,
+      limit,
+      offset
     } = getRewardsSchema.parse(searchParams)
 
     // Get user's tier level for filtering
@@ -89,22 +93,47 @@ export async function GET(request: NextRequest) {
       where.price = { ...where.price, lte: maxPrice }
     }
 
-    if (inStock) {
-      where.OR = [
-        { stock: null }, // unlimited
-        { stock: { gt: 0 } }
-      ]
+    // Shop visibility filter
+    if (shopVisibility === 'shop') {
+      where.isShopVisible = true
+    } else if (shopVisibility === 'system') {
+      where.isShopVisible = false
+    }
+    // 'all' shows both shop and system visible products
+
+    // Legacy parameter support
+    if (includeSystemOnly === false && shopVisibility === 'shop') {
+      where.isShopVisible = true
     }
 
-    // Filter by tier requirement (user can only see products they can access)
-    where.OR = [
-      { tierRequired: null },
-      {
-        tier: {
-          level: { lte: userTierLevel }
+    // Build AND conditions array for complex filtering
+    const andConditions = []
+
+    // Stock filter
+    if (inStock) {
+      andConditions.push({
+        OR: [
+          { stock: null }, // unlimited
+          { stock: { gt: 0 } }
+        ]
+      })
+    }
+
+    // Tier requirement filter (user can only see products they can access)
+    andConditions.push({
+      OR: [
+        { tierRequired: null },
+        {
+          tier: {
+            level: { lte: userTierLevel }
+          }
         }
-      }
-    ]
+      ]
+    })
+
+    if (andConditions.length > 0) {
+      where.AND = andConditions
+    }
 
     // Get total count
     const total = await prisma.product.count({ where })
@@ -191,6 +220,7 @@ const createProductSchema = z.object({
   deliveryType: z.enum(['AUTOMATIC', 'CODE', 'PHYSICAL', 'MANUAL']).default('AUTOMATIC'),
   metadata: z.record(z.any()).default({}),
   order: z.number().default(0),
+  isShopVisible: z.boolean().default(true),
 })
 
 export async function POST(request: NextRequest) {

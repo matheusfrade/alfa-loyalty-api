@@ -18,404 +18,190 @@ export interface MissionTemplate {
   maxClaims?: number
 }
 
+// Simplified 5 flexible templates with unified filter system
 const templates: MissionTemplate[] = [
-  // ========== TEMPLATES ATUALIZADOS ==========
+  // 1. CASINO BASE TEMPLATE
   {
-    id: 'sportsbook-beginner',
-    name: 'Primeira Aposta Esportiva',
-    description: 'Faça sua primeira aposta em esportes de R$ 10',
+    id: 'casino-base',
+    name: 'Missão de Casino',
+    description: 'Template base para missões de jogos de casino (slots, mesa, live)',
     icon: <Gamepad2 className="w-5 h-5" />,
-    vertical: 'sportsbook',
+    vertical: 'casino',
     category: 'beginner',
-    module: 'sportsbook',
+    module: 'igaming',
     rule: {
       triggers: [
-        { event: 'bet_placed', aggregation: 'count' }
+        {
+          event: 'spin',
+          label: 'Giros em Slots',
+          aggregation: 'count',
+          filters: [
+            { field: 'amount', operator: '>=', value: 1 }
+          ]
+        }
       ],
-      conditionTree: {
-        type: 'AND',
-        conditions: [
-          { field: 'bet_amount_sportsbook', operator: '>=', value: 10 }
-        ]
-      },
-      conditions: [],
-      logic: 'AND'
+      logic: 'AND',
+      timeWindow: { duration: '1d', sliding: false },
+      maxClaims: 1
     },
     reward: 50,
     xp: 100,
+    timeWindow: '1d',
     maxClaims: 1
   },
+
+  // 2. SPORTSBOOK BASE TEMPLATE
   {
-    id: 'casino-or-sportsbook',
-    name: 'Apostador Flexível',
-    description: 'Aposte R$ 50+ em esportes OU R$ 50+ em casino',
-    icon: <Target className="w-5 h-5" />,
-    vertical: 'igaming',
+    id: 'sportsbook-base',
+    name: 'Missão de Apostas Esportivas',
+    description: 'Template base para missões de apostas esportivas com filtros customizáveis',
+    icon: <Trophy className="w-5 h-5" />,
+    vertical: 'sportsbook',
+    category: 'beginner',
+    module: 'igaming',
+    rule: {
+      triggers: [
+        {
+          event: 'sportsbook_bet_placed',
+          label: 'Apostas Esportivas',
+          aggregation: 'count',
+          filters: [
+            { field: 'amount', operator: '>=', value: 10 }
+          ]
+        }
+      ],
+      logic: 'AND',
+      timeWindow: { duration: '1d', sliding: false },
+      maxClaims: 1
+    },
+    reward: 50,
+    xp: 100,
+    timeWindow: '1d',
+    maxClaims: 1
+  },
+
+  // 2.5. SPORTSBOOK MULTI-SPORT EXAMPLE
+  {
+    id: 'sportsbook-multi-sport',
+    name: 'Fã de Esportes Populares',
+    description: 'Aposte em futebol OU basquete (exemplo de filtros múltiplos)',
+    icon: <Trophy className="w-5 h-5" />,
+    vertical: 'sportsbook',
     category: 'intermediate',
     module: 'igaming',
     rule: {
       triggers: [
-        { event: 'bet_placed' },
-        { event: 'spin' }
+        {
+          event: 'sportsbook_bet_placed',
+          label: 'Apostas em Esportes Populares',
+          aggregation: 'count',
+          filters: [
+            { field: 'sport', operator: 'in', value: ['futebol', 'basquete'] },
+            { field: 'amount', operator: '>=', value: 25 }
+          ]
+        }
       ],
-      conditionTree: {
-        type: 'OR',
-        conditions: [
-          { field: 'bet_amount_sportsbook', operator: '>=', value: 50 },
-          { field: 'bet_amount_casino', operator: '>=', value: 50 }
-        ]
-      },
-      conditions: [],
-      logic: 'OR'
+      logic: 'AND',
+      timeWindow: { duration: '7d', sliding: false },
+      maxClaims: 3
     },
-    reward: 100,
-    xp: 200,
+    reward: 75,
+    xp: 150,
+    timeWindow: '7d',
+    maxClaims: 3
+  },
+
+  // 3. DEPOSIT BASE TEMPLATE
+  {
+    id: 'deposit-base',
+    name: 'Missão de Depósitos',
+    description: 'Template base para missões de depósitos com filtros de valor e método',
+    icon: <Wallet className="w-5 h-5" />,
+    vertical: 'deposits',
+    category: 'beginner',
+    module: 'deposits',
+    rule: {
+      triggers: [
+        {
+          event: 'deposit_completed',
+          label: 'Depósitos Realizados',
+          aggregation: 'count',
+          filters: [
+            { field: 'amount', operator: '>=', value: 20 }
+          ]
+        }
+      ],
+      logic: 'AND',
+      maxClaims: 1
+    },
+    reward: 75,
+    xp: 150,
     maxClaims: 1
   },
+
+  // 4. LOGIN/ACTIVITY BASE TEMPLATE
   {
-    id: 'igaming-vip-player',
-    name: 'Jogador VIP Multi-Produto',
-    description: 'Aposte R$ 250+ em esportes E R$ 250+ em casino na semana',
+    id: 'activity-base',
+    name: 'Missão de Atividade',
+    description: 'Template base para missões de login, atividade diária e engajamento',
+    icon: <Activity className="w-5 h-5" />,
+    vertical: 'engagement',
+    category: 'beginner',
+    module: 'igaming',
+    rule: {
+      triggers: [
+        {
+          event: 'user_login',
+          label: 'Logins Diários',
+          aggregation: 'count'
+        }
+      ],
+      logic: 'AND',
+      timeWindow: { duration: '1d', sliding: false },
+      cooldown: 86400
+    },
+    reward: 25,
+    xp: 50,
+    timeWindow: '1d',
+    cooldown: 86400
+  },
+
+  // 5. MULTI-TRIGGER SEQUENCE TEMPLATE
+  {
+    id: 'sequence-base',
+    name: 'Missão Multi-Produto',
+    description: 'Template para missões complexas com múltiplos triggers (AND/OR)',
     icon: <Star className="w-5 h-5" />,
     vertical: 'igaming',
     category: 'advanced',
     module: 'igaming',
     rule: {
       triggers: [
-        { 
-          event: 'bet_placed', 
-          debounce: 10000,
-          aggregation: 'sum'
+        {
+          event: 'sportsbook_bet_placed',
+          label: 'Apostas Esportivas',
+          required: true,
+          aggregation: 'sum',
+          filters: [
+            { field: 'amount', operator: '>=', value: 100 }
+          ]
         },
-        { 
-          event: 'spin', 
-          debounce: 10000,
-          aggregation: 'sum'
+        {
+          event: 'spin',
+          label: 'Giros em Casino',
+          required: false,
+          aggregation: 'sum',
+          filters: [
+            { field: 'amount', operator: '>=', value: 50 }
+          ]
         }
       ],
-      conditionTree: {
-        type: 'AND',
-        conditions: [
-          { field: 'bet_amount_sportsbook', operator: '>=', value: 250 },
-          { field: 'bet_amount_casino', operator: '>=', value: 250 }
-        ]
-      },
-      conditions: [],
-      logic: 'AND',
+      logic: 'OR',
       timeWindow: { duration: '7d', sliding: false }
-    },
-    reward: 250,
-    xp: 500,
-    timeWindow: '7d',
-    cooldown: 604800
-  },
-  
-  {
-    id: 'first-deposit-bonus',
-    name: 'Bônus de Primeiro Depósito',
-    description: 'Faça seu primeiro depósito de R$ 50+ e ganhe bônus',
-    icon: <Wallet className="w-5 h-5" />,
-    vertical: 'deposits',
-    category: 'beginner',
-    module: 'igaming',
-    rule: {
-      triggers: [
-        { event: 'deposit_made' }
-      ],
-      conditions: [
-        { field: 'amount', operator: '>=', value: 50 },
-        { field: 'first_deposit', operator: '==', value: true }
-      ],
-      logic: 'AND',
-      maxClaims: 1
-    },
-    reward: 100,
-    xp: 200,
-    maxClaims: 1
-  },
-
-  // ========== ENGAGEMENT TEMPLATES (Multi-Vertical) ==========
-  {
-    id: 'daily-login',
-    name: 'Login Diário',
-    description: 'Faça login todos os dias para ganhar recompensas',
-    icon: <Activity className="w-5 h-5" />,
-    vertical: 'engagement',
-    category: 'beginner',
-    module: 'igaming', // Can use any module
-    rule: {
-      triggers: [{
-        event: 'user_login'
-      }],
-      conditions: [],
-      logic: 'AND',
-      timeWindow: { duration: '1d', sliding: false }
-    },
-    reward: 10,
-    xp: 20,
-    timeWindow: '1d',
-    cooldown: 86400
-  },
-  {
-    id: 'streak-7days',
-    name: 'Sequência de 7 Dias',
-    description: 'Mantenha atividade por 7 dias consecutivos',
-    icon: <Target className="w-5 h-5" />,
-    vertical: 'engagement',
-    category: 'intermediate',
-    module: 'igaming',
-    rule: {
-      triggers: [{
-        event: 'daily_activity'
-      }],
-      conditions: [
-        { field: 'streak_days', operator: '>=', value: 7 }
-      ],
-      logic: 'AND',
-      timeWindow: { duration: '7d', sliding: true }
     },
     reward: 200,
     xp: 400,
     timeWindow: '7d'
-  },
-  {
-    id: 'first-action',
-    name: 'Primeira Ação',
-    description: 'Complete sua primeira ação na plataforma',
-    icon: <Zap className="w-5 h-5" />,
-    vertical: 'engagement',
-    category: 'beginner',
-    module: 'igaming',
-    rule: {
-      triggers: [{
-        event: 'first_action'
-      }],
-      conditions: [],
-      logic: 'AND',
-      maxClaims: 1
-    },
-    reward: 25,
-    xp: 50,
-    maxClaims: 1
-  },
-
-  // ========== DEPOSITS TEMPLATES (Multi-Vertical) ==========
-  {
-    id: 'first-deposit',
-    name: 'Primeiro Depósito',
-    description: 'Faça seu primeiro depósito e ganhe bônus',
-    icon: <Wallet className="w-5 h-5" />,
-    vertical: 'deposits',
-    category: 'beginner',
-    module: 'igaming',
-    rule: {
-      triggers: [{
-        event: 'deposit_made'
-      }],
-      conditions: [
-        { field: 'deposit_amount', operator: '>=', value: 20 }
-      ],
-      logic: 'AND',
-      maxClaims: 1
-    },
-    reward: 50,
-    xp: 100,
-    maxClaims: 1
-  },
-  {
-    id: 'weekly-deposit',
-    name: 'Depósito Semanal',
-    description: 'Deposite pelo menos R$ 100 por semana',
-    icon: <DollarSign className="w-5 h-5" />,
-    vertical: 'deposits',
-    category: 'intermediate',
-    module: 'igaming',
-    rule: {
-      triggers: [{
-        event: 'deposit_made',
-        debounce: 3600000 // 1 hour
-      }],
-      conditions: [
-        { field: 'deposit_amount', operator: '>=', value: 100 }
-      ],
-      logic: 'AND',
-      timeWindow: { duration: '7d', sliding: false }
-    },
-    reward: 75,
-    xp: 150,
-    timeWindow: '7d',
-    cooldown: 604800
-  },
-  {
-    id: 'vip-deposit',
-    name: 'Depósito VIP',
-    description: 'Deposite R$ 1000+ e ganhe status VIP temporário',
-    icon: <Gift className="w-5 h-5" />,
-    vertical: 'deposits',
-    category: 'advanced',
-    module: 'igaming',
-    rule: {
-      triggers: [{
-        event: 'deposit_made'
-      }],
-      conditions: [
-        { field: 'deposit_amount', operator: '>=', value: 1000 }
-      ],
-      logic: 'AND',
-      timeWindow: { duration: '30d', sliding: false }
-    },
-    reward: 500,
-    xp: 1000,
-    timeWindow: '30d',
-    maxClaims: 3
-  },
-
-  // ========== SPORTSBOOK TEMPLATES ==========
-  {
-    id: 'first-sports-bet',
-    name: 'Primeira Aposta Esportiva',
-    description: 'Faça sua primeira aposta em esportes',
-    icon: <Trophy className="w-5 h-5" />,
-    vertical: 'sportsbook',
-    category: 'beginner',
-    module: 'igaming',
-    rule: {
-      triggers: [{
-        event: 'sportsbook_bet_placed'
-      }],
-      conditions: [
-        { field: 'bet_amount', operator: '>=', value: 10 }
-      ],
-      logic: 'AND',
-      maxClaims: 1
-    },
-    reward: 30,
-    xp: 60,
-    maxClaims: 1
-  },
-  {
-    id: 'football-fan',
-    name: 'Fã de Futebol',
-    description: 'Aposte R$ 50+ em jogos de futebol',
-    icon: <Trophy className="w-5 h-5" />,
-    vertical: 'sportsbook',
-    category: 'intermediate',
-    module: 'igaming',
-    rule: {
-      triggers: [{
-        event: 'sportsbook_bet_placed',
-        filters: [
-          { field: 'sport', operator: '==', value: 'football' }
-        ]
-      }],
-      conditions: [
-        { field: 'bet_amount', operator: '>=', value: 50 }
-      ],
-      logic: 'AND',
-      timeWindow: { duration: '7d', sliding: true }
-    },
-    reward: 75,
-    xp: 150,
-    timeWindow: '7d'
-  },
-  {
-    id: 'combo-master',
-    name: 'Mestre das Combinadas',
-    description: 'Faça 5 apostas combinadas com odds 3.0+',
-    icon: <Star className="w-5 h-5" />,
-    vertical: 'sportsbook',
-    category: 'advanced',
-    module: 'igaming',
-    rule: {
-      triggers: [{
-        event: 'sportsbook_bet_placed',
-        debounce: 5000
-      }],
-      conditionTree: {
-        type: 'AND',
-        conditions: [
-          { field: 'bet_type', operator: '==', value: 'combined' },
-          { field: 'odds', operator: '>=', value: 3.0 },
-          { field: 'bet_count', operator: '>=', value: 5, aggregation: 'count' }
-        ]
-      },
-      conditions: [],
-      logic: 'AND',
-      timeWindow: { duration: '7d', sliding: true }
-    },
-    reward: 150,
-    xp: 300,
-    timeWindow: '7d',
-    cooldown: 86400
-  },
-
-  // ========== CASINO TEMPLATES ==========
-  {
-    id: 'first-spin',
-    name: 'Primeiro Giro',
-    description: 'Faça seu primeiro giro em slots',
-    icon: <Gamepad2 className="w-5 h-5" />,
-    vertical: 'casino',
-    category: 'beginner',
-    module: 'igaming',
-    rule: {
-      triggers: [{
-        event: 'slot_spin'
-      }],
-      conditions: [],
-      logic: 'AND',
-      maxClaims: 1
-    },
-    reward: 20,
-    xp: 40,
-    maxClaims: 1
-  },
-  {
-    id: 'daily-slots',
-    name: 'Slots Diários',
-    description: 'Jogue 50 rodadas de slots por dia',
-    icon: <Clock className="w-5 h-5" />,
-    vertical: 'casino',
-    category: 'intermediate',
-    module: 'igaming',
-    rule: {
-      triggers: [{
-        event: 'slot_spin'
-      }],
-      conditions: [
-        { field: 'spin_count', operator: '>=', value: 50, aggregation: 'count' }
-      ],
-      logic: 'AND',
-      timeWindow: { duration: '1d', sliding: false }
-    },
-    reward: 40,
-    xp: 80,
-    timeWindow: '1d',
-    cooldown: 86400
-  },
-  {
-    id: 'vip-table',
-    name: 'Mesa VIP',
-    description: 'Aposte R$ 200+ em jogos de mesa ao vivo',
-    icon: <Star className="w-5 h-5" />,
-    vertical: 'casino',
-    category: 'advanced',
-    module: 'igaming',
-    rule: {
-      triggers: [{
-        event: 'live_casino_bet_placed'
-      }],
-      conditions: [
-        { field: 'bet_amount', operator: '>=', value: 200 },
-        { field: 'game_type', operator: 'in', value: ['blackjack', 'roulette', 'baccarat'] }
-      ],
-      logic: 'AND',
-      timeWindow: { duration: '1d', sliding: true }
-    },
-    reward: 100,
-    xp: 200,
-    timeWindow: '1d',
-    cooldown: 86400
   }
 ]
 
@@ -429,11 +215,11 @@ export function QuickTemplates({ onSelectTemplate, className = '' }: QuickTempla
   
   const verticals = [
     { key: 'all', label: 'Todos', icon: '🌐', color: 'bg-gray-50 border-gray-200' },
-    { key: 'igaming', label: 'iGaming', icon: '🎮', color: 'bg-purple-50 border-purple-200' },
-    { key: 'engagement', label: 'Engajamento', icon: '🎯', color: 'bg-blue-50 border-blue-200' },
-    { key: 'deposits', label: 'Depósitos', icon: '💰', color: 'bg-green-50 border-green-200' },
+    { key: 'casino', label: 'Casino', icon: '🎰', color: 'bg-pink-50 border-pink-200' },
     { key: 'sportsbook', label: 'Sportsbook', icon: '⚽', color: 'bg-orange-50 border-orange-200' },
-    { key: 'casino', label: 'Casino', icon: '🎰', color: 'bg-pink-50 border-pink-200' }
+    { key: 'deposits', label: 'Depósitos', icon: '💰', color: 'bg-green-50 border-green-200' },
+    { key: 'engagement', label: 'Engajamento', icon: '🎯', color: 'bg-blue-50 border-blue-200' },
+    { key: 'igaming', label: 'Multi-Produto', icon: '🎮', color: 'bg-purple-50 border-purple-200' }
   ]
 
   const categoryLabels = {
@@ -454,10 +240,10 @@ export function QuickTemplates({ onSelectTemplate, className = '' }: QuickTempla
     <div className={`space-y-6 ${className}`}>
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          🚀 Templates Rápidos de Missões
+          🚀 Templates Flexíveis de Missões
         </h3>
         <p className="text-sm text-gray-600">
-          Escolha um template pronto por vertical ou crie uma missão personalizada do zero
+          5 templates base com filtros unificados. Para condições como "futebol OU basquete", use o operador "está em" com múltiplos valores nos filtros do trigger.
         </p>
       </div>
 
@@ -542,9 +328,12 @@ export function QuickTemplates({ onSelectTemplate, className = '' }: QuickTempla
                   {/* Rule Preview */}
                   <div className="mt-2 pt-2 border-t border-gray-200">
                     <div className="text-xs text-gray-500">
-                      <strong>Regras:</strong> {template.rule.triggers?.length || 0} triggers, 
-                      {' '}{template.rule.conditions?.length || 0} condições
-                      {template.rule.conditionTree && ' (lógica avançada)'}
+                      <strong>Triggers:</strong> {template.rule.triggers?.length || 0} evento(s)
+                      <br />
+                      <strong>Lógica:</strong> {template.rule.logic}
+                      {template.rule.triggers?.some(t => t.filters?.length) && (
+                        <span> • {template.rule.triggers.reduce((total, t) => total + (t.filters?.length || 0), 0)} filtro(s)</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -560,11 +349,29 @@ export function QuickTemplates({ onSelectTemplate, className = '' }: QuickTempla
         </div>
       )}
 
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-        <p className="text-sm text-yellow-800">
-          💡 <strong>Dica:</strong> Após selecionar um template, você verá as regras aplicadas e poderá 
-          personalizar todos os valores antes de criar a missão.
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+        <p className="text-sm text-green-900 font-medium mb-2">
+          ✅ <strong>Solução para sua dúvida:</strong> Como fazer "futebol OU basquete"?
         </p>
+        <div className="text-sm text-green-800 space-y-2">
+          <div className="flex items-start gap-2">
+            <span className="font-medium">1.</span>
+            <span>No trigger, adicione um filtro: <strong>Campo</strong> = "sport"</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="font-medium">2.</span>
+            <span>Escolha operador: <strong>"está em"</strong> (permite múltiplos valores)</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="font-medium">3.</span>
+            <span>Selecione valores: <strong>futebol E basquete</strong> (isso é OU automático)</span>
+          </div>
+          <div className="mt-2 p-2 bg-green-100 rounded">
+            <p className="text-xs text-green-700">
+              <strong>💡 Dica:</strong> O template "Fã de Esportes Populares" já mostra esse exemplo funcionando!
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )

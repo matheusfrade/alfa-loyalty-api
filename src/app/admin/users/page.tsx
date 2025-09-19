@@ -38,90 +38,23 @@ export default function UsersPage() {
 
   const loadUsers = async () => {
     try {
-      // Mock data since we don't have the API endpoint yet
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      const mockUsers: User[] = [
-        {
-          id: '1',
-          name: 'Test User 1',
-          email: 'user1@test.com',
-          isActive: true,
-          createdAt: '2025-01-01T00:00:00Z',
-          lastLoginAt: '2025-09-05T08:30:00Z',
-          programs: [{
-            id: '1',
-            coins: 1250,
-            xp: 350,
-            tier: { name: 'Bronze', level: 1, color: '#CD7F32' },
-            program: { name: 'Alfa Gaming' }
-          }]
-        },
-        {
-          id: '2',
-          name: 'Test User 2',
-          email: 'user2@test.com',
-          isActive: true,
-          createdAt: '2025-01-02T00:00:00Z',
-          lastLoginAt: '2025-09-04T18:45:00Z',
-          programs: [{
-            id: '2',
-            coins: 2800,
-            xp: 750,
-            tier: { name: 'Prata', level: 2, color: '#C0C0C0' },
-            program: { name: 'Alfa Gaming' }
-          }]
-        },
-        {
-          id: '3',
-          name: 'Test User 3',
-          email: 'user3@test.com',
-          isActive: true,
-          createdAt: '2025-01-03T00:00:00Z',
-          lastLoginAt: '2025-09-05T09:15:00Z',
-          programs: [{
-            id: '3',
-            coins: 4500,
-            xp: 1850,
-            tier: { name: 'Ouro', level: 3, color: '#FFD700' },
-            program: { name: 'Alfa Gaming' }
-          }]
-        },
-        {
-          id: '4',
-          name: 'Test User 4',
-          email: 'user4@test.com',
-          isActive: false,
-          createdAt: '2025-01-04T00:00:00Z',
-          lastLoginAt: '2025-08-20T14:20:00Z',
-          programs: [{
-            id: '4',
-            coins: 150,
-            xp: 50,
-            tier: { name: 'Iniciante', level: 0, color: '#6b7280' },
-            program: { name: 'Alfa Gaming' }
-          }]
-        },
-        {
-          id: '5',
-          name: 'VIP User',
-          email: 'vip@test.com',
-          isActive: true,
-          createdAt: '2024-12-15T00:00:00Z',
-          lastLoginAt: '2025-09-05T07:00:00Z',
-          programs: [{
-            id: '5',
-            coins: 8750,
-            xp: 18500,
-            tier: { name: 'VIP', level: 5, color: '#9333EA' },
-            program: { name: 'Alfa Gaming' }
-          }]
-        }
-      ]
-      
-      setUsers(mockUsers)
+      const response = await fetch('/api/admin/users')
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch users')
+      }
+
+      const result = await response.json()
+
+      if (result.users) {
+        setUsers(result.users)
+      } else {
+        throw new Error('Invalid response format')
+      }
     } catch (error) {
       console.error('Failed to load users:', error)
+      // Fallback to empty state on error
+      setUsers([])
     } finally {
       setLoading(false)
     }

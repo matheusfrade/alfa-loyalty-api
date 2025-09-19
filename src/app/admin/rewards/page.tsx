@@ -14,6 +14,7 @@ interface Product {
   image?: string
   stock?: number
   isActive: boolean
+  isShopVisible?: boolean
   deliveryType: string
   program: {
     id: string
@@ -32,14 +33,20 @@ export default function RewardsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [visibilityFilter, setVisibilityFilter] = useState('all')
 
   useEffect(() => {
     loadProducts()
-  }, [])
+  }, [visibilityFilter])
 
   const loadProducts = async () => {
     try {
-      const response = await fetch('/api/rewards')
+      const params = new URLSearchParams()
+      if (visibilityFilter !== 'all') {
+        params.set('shopVisibility', visibilityFilter)
+      }
+
+      const response = await fetch(`/api/rewards?${params}`)
       if (response.ok) {
         const data = await response.json()
         setProducts(data.products || [])
@@ -205,30 +212,55 @@ export default function RewardsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 flex-wrap">
-        {[
-          { key: 'all', label: 'All Products' },
-          { key: 'active', label: 'Active' },
-          { key: 'inactive', label: 'Inactive' },
-          { key: 'low_stock', label: 'Low Stock' },
-          { key: 'BONUS', label: 'Bonus' },
-          { key: 'FREESPINS', label: 'Free Spins' },
-          { key: 'CASHBACK', label: 'Cashback' },
-          { key: 'PHYSICAL', label: 'Physical' },
-          { key: 'EXPERIENCE', label: 'Experience' },
-        ].map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key)}
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              filter === key
-                ? 'bg-blue-100 text-blue-800'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="space-y-3">
+        {/* Category Filters */}
+        <div className="flex gap-2 flex-wrap">
+          {[
+            { key: 'all', label: 'All Products' },
+            { key: 'active', label: 'Active' },
+            { key: 'inactive', label: 'Inactive' },
+            { key: 'low_stock', label: 'Low Stock' },
+            { key: 'BONUS', label: 'Bonus' },
+            { key: 'FREESPINS', label: 'Free Spins' },
+            { key: 'CASHBACK', label: 'Cashback' },
+            { key: 'PHYSICAL', label: 'Physical' },
+            { key: 'EXPERIENCE', label: 'Experience' },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setFilter(key)}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                filter === key
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Visibility Filters */}
+        <div className="flex gap-2 items-center">
+          <span className="text-sm font-medium text-gray-700">Visibility:</span>
+          {[
+            { key: 'all', label: '🔍 All' },
+            { key: 'shop', label: '🏪 Shop Only' },
+            { key: 'system', label: '⚙️ System Only' },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setVisibilityFilter(key)}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                visibilityFilter === key
+                  ? 'bg-purple-100 text-purple-800'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -241,13 +273,23 @@ export default function RewardsPage() {
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-2 left-2 flex gap-1">
+                <div className="absolute top-2 left-2 flex gap-1 flex-wrap">
                   <span className={`px-2 py-1 text-xs rounded-full ${getCategoryColor(product.category)}`}>
                     {product.category}
                   </span>
                   {!product.isActive && (
                     <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">
                       Inactive
+                    </span>
+                  )}
+                  {product.isShopVisible === false && (
+                    <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">
+                      ⚙️ System Only
+                    </span>
+                  )}
+                  {product.isShopVisible !== false && (
+                    <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                      🏪 Shop
                     </span>
                   )}
                 </div>

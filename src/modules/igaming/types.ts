@@ -208,11 +208,15 @@ export const IGAMING_EVENT_TYPES: EventTypeDefinition[] = [
         validation: { min: 1.01, max: 1000 }
       },
       {
-        name: 'is_live',
-        label: 'Aposta Ao Vivo',
-        type: 'boolean',
+        name: 'bet_timing',
+        label: 'Timing da Aposta',
+        type: 'enum',
         required: false,
-        helper: 'Aposta feita durante o jogo'
+        options: [
+          { value: 'pre_game', label: 'Pré-jogo 📋', helper: 'Aposta antes do jogo começar' },
+          { value: 'live', label: 'Ao Vivo 🔴', helper: 'Aposta durante o jogo' }
+        ],
+        helper: 'Quando a aposta foi realizada'
       },
       {
         name: 'team_home',
@@ -242,6 +246,7 @@ export const IGAMING_EVENT_TYPES: EventTypeDefinition[] = [
           championship: 'brasileirao_a',
           market_type: 'resultado_final',
           odds_total: 2.1,
+          bet_timing: 'pre_game',
           team_home: 'Flamengo',
           team_away: 'Palmeiras'
         }
@@ -449,7 +454,7 @@ export const IGAMING_EVENT_TYPES: EventTypeDefinition[] = [
       },
       {
         name: 'first_deposit',
-        label: 'Primeiro Depósito',
+        label: 'Primeiro Depósito (iGaming)',
         type: 'boolean',
         required: false,
         helper: 'É o primeiro depósito do usuário?'

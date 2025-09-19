@@ -7,6 +7,7 @@ import { CASINO_MODULE } from './casino'
 import { SPORTSBOOK_MODULE } from './sportsbook'
 import { DEPOSITS_MODULE } from './deposits'
 import { ENGAGEMENT_MODULE } from './engagement'
+import { TIERS_MODULE } from './tiers'
 
 // Auto-register all modules
 export function initializeModules() {
@@ -28,6 +29,9 @@ export function initializeModules() {
     
     moduleRegistry.register(ENGAGEMENT_MODULE)
     console.log('✅ Engagement module registered successfully')
+
+    moduleRegistry.register(TIERS_MODULE)
+    console.log('✅ Tiers module registered successfully')
     
     // Log system status
     const stats = moduleRegistry.getModuleStats()
@@ -64,6 +68,7 @@ export { CASINO_MODULE } from './casino'
 export { SPORTSBOOK_MODULE } from './sportsbook'
 export { DEPOSITS_MODULE } from './deposits'
 export { ENGAGEMENT_MODULE } from './engagement'
+export { TIERS_MODULE } from './tiers'
 
 // Export module registry helpers
 export {

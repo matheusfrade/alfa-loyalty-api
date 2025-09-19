@@ -3,19 +3,21 @@
 
 import React from 'react'
 
-// Base mission rule structure (agnostic)
+// Base mission rule structure (unified architecture)
 export interface BaseMissionRule {
-  triggers: BaseTrigger[]
-  // Support both simple and complex condition structures
-  conditions: BaseCondition[]  // Keep for backward compatibility
-  conditionTree?: ConditionGroup  // New flexible structure
-  logic?: 'AND' | 'OR' | 'NOT'  // Keep for backward compatibility
-  timeWindow?: TimeWindow
-  cooldown?: number
-  maxClaims?: number
+  triggers: BaseTrigger[]  // EVENT FILTERS: amount, sport, method, etc. - MOST IMPORTANT
+  logic: 'AND' | 'OR'      // Logic between multiple triggers
+  timeWindow?: TimeWindow  // When mission can be completed
+  cooldown?: number        // Time between completions
+  maxClaims?: number       // Max times can be completed
+  businessRules?: BaseCondition[]  // BUSINESS RULES: user_tier, account_age, kyc_verified - RARELY USED
+  metadata?: Record<string, any>
+
+  // Deprecated - keeping for backward compatibility only
+  conditions?: BaseCondition[]
+  conditionTree?: ConditionGroup
   prerequisites?: string[]
   excludeIf?: BaseCondition[]
-  metadata?: Record<string, any>
 }
 
 // Advanced condition grouping for complex logic
@@ -25,19 +27,17 @@ export interface ConditionGroup {
   label?: string  // Optional label for UI display
 }
 
-// Base trigger (can be extended by modules)
+// Base trigger - THIS IS WHERE MOST FILTERING HAPPENS
 export interface BaseTrigger {
-  event: string  // Module-specific event type
-  filters?: EventFilter[]
-  debounce?: number
-  // New: conditions specific to this trigger
+  event: string  // Which event to monitor (e.g., 'sportsbook_bet_placed')
+  filters?: EventFilter[]  // EVENT CONDITIONS: amount >= 100, sport in ['futebol', 'basquete'], etc.
+  debounce?: number        // Anti-spam delay in milliseconds
+  label?: string           // Display name for UI
+  aggregation?: AggregationType  // How to aggregate: sum, count, max, etc.
+  required?: boolean       // For multi-trigger missions: is this trigger mandatory?
+
+  // Deprecated - use filters instead
   conditions?: BaseCondition[]
-  // New: label for better UX
-  label?: string
-  // New: aggregation for this trigger (sum, count, etc)
-  aggregation?: AggregationType
-  // New: required flag for cross-sell missions
-  required?: boolean
 }
 
 // Base condition (can be extended by modules)

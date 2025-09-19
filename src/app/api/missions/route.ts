@@ -7,6 +7,7 @@ const getMissionsSchema = z.object({
   programId: z.string().optional(),
   category: z.string().optional(),
   status: z.enum(['ACTIVE', 'COMPLETED', 'CLAIMED', 'EXPIRED']).optional(),
+  includeInactive: z.union([z.string(), z.boolean()]).transform(val => val === 'true' || val === true).default(false),
   limit: z.union([z.string(), z.number()]).transform(Number).default(50),
   offset: z.union([z.string(), z.number()]).transform(Number).default(0),
 })
@@ -33,11 +34,14 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url)
     const searchParams = Object.fromEntries(url.searchParams.entries())
-    const { programId, category, status, limit, offset } = getMissionsSchema.parse(searchParams)
+    const { programId, category, status, includeInactive, limit, offset } = getMissionsSchema.parse(searchParams)
 
     // Build where clause
-    const where: any = {
-      isActive: true,
+    const where: any = {}
+
+    // Only filter by isActive if admin doesn't want to include inactive missions
+    if (!includeInactive || !payload.isAdmin) {
+      where.isActive = true
     }
 
     if (programId) {
@@ -134,7 +138,9 @@ const createMissionSchema = z.object({
   type: z.enum(['SINGLE', 'RECURRING', 'STREAK', 'MILESTONE']).default('SINGLE'),
   icon: z.string().optional(),
   reward: z.number().min(0).default(0),
+  coinsReward: z.number().min(0).default(0),
   xpReward: z.number().min(0).default(0),
+  tierPointsReward: z.number().min(0).default(0),
   requirement: z.record(z.any()).default({}),
   maxClaims: z.number().optional(),
   startDate: z.string().optional().transform(val => {
@@ -188,8 +194,9 @@ export async function POST(request: NextRequest) {
         category: data.category,
         type: data.type,
         icon: data.icon,
-        reward: data.reward,
+        reward: data.coinsReward || data.reward || 0,
         xpReward: data.xpReward,
+        tierPointsReward: data.tierPointsReward,
         requirement: JSON.stringify(data.requirement),
         maxClaims: data.maxClaims,
         startDate: data.startDate ? new Date(data.startDate) : null,

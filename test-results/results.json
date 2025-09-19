@@ -1,0 +1,664 @@
+{
+  "config": {
+    "configFile": "/Users/matheusfrade/Desktop/ALFA/alfa-ai-base/projects/loyalty-api/playwright.config.ts",
+    "rootDir": "/Users/matheusfrade/Desktop/ALFA/alfa-ai-base/projects/loyalty-api/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/matheusfrade/Desktop/ALFA/alfa-ai-base/projects/loyalty-api/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/matheusfrade/Desktop/ALFA/alfa-ai-base/projects/loyalty-api/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/matheusfrade/Desktop/ALFA/alfa-ai-base/projects/loyalty-api/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/Users/matheusfrade/Desktop/ALFA/alfa-ai-base/projects/loyalty-api/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/matheusfrade/Desktop/ALFA/alfa-ai-base/projects/loyalty-api/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/Users/matheusfrade/Desktop/ALFA/alfa-ai-base/projects/loyalty-api/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.54.2",
+    "workers": 6,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3005",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "module-initialization-with-auth.spec.ts",
+      "file": "module-initialization-with-auth.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Module Initialization Test with Authentication",
+          "file": "module-initialization-with-auth.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should test module initialization on missions page after login",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 12355,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🚀 Starting test: Navigating to /admin/missions/new (will redirect to login)\n"
+                        },
+                        {
+                          "text": "[INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold\n"
+                        },
+                        {
+                          "text": "[ERROR] Failed to load resource: the server responded with a status of 404 (Not Found)\n"
+                        },
+                        {
+                          "text": "[ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized)\n"
+                        },
+                        {
+                          "text": "[ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized)\n"
+                        },
+                        {
+                          "text": "[VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: \"current-password\"): (More info: https://goo.gl/9p2vKq) %o\n"
+                        },
+                        {
+                          "text": "🔐 Login page detected, attempting to log in...\n"
+                        },
+                        {
+                          "text": "✅ Filled login credentials\n"
+                        },
+                        {
+                          "text": "✅ Login completed, checking current URL...\n"
+                        },
+                        {
+                          "text": "Current URL: http://localhost:3005/admin\n"
+                        },
+                        {
+                          "text": "🧭 Navigating to missions page...\n"
+                        },
+                        {
+                          "text": "[INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold\n"
+                        },
+                        {
+                          "text": "[LOG] 🔧 Starting mission system initialization...\n"
+                        },
+                        {
+                          "text": "[LOG] 🚀 Initializing modular mission system...\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"igaming\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ iGaming module registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"casino\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Casino module registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"sportsbook\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Sportsbook module registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"deposits\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Deposits module registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"engagement\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Engagement module registered successfully\n"
+                        },
+                        {
+                          "text": "[ERROR] ❌ Failed to initialize modules: TypeError: _module_validators.forEach is not a function\n    at ModuleRegistry.validateModule (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:175:122)\n    at ModuleRegistry.register (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:26:33)\n    at initializeModules (webpack-internal:///(app-pages-browser)/./src/modules/index.ts:53:75)\n    at initializeSystem (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/index.tsx:59:87)\n    at eval (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/index.tsx:54:9)\n    at commitHookEffectListMount (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:21102:23)\n    at commitHookPassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23154:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23259:11)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n"
+                        },
+                        {
+                          "text": "[LOG] 🔧 Module initialization result: {success: false, error: _module_validators.forEach is not a function, modules: Array(0)}\n"
+                        },
+                        {
+                          "text": "[ERROR] ❌ Mission system initialization failed: _module_validators.forEach is not a function\n"
+                        },
+                        {
+                          "text": "[LOG] 🔧 Forcing initialization to proceed anyway for debugging...\n"
+                        },
+                        {
+                          "text": "[LOG] 🔧 Starting mission system initialization...\n"
+                        },
+                        {
+                          "text": "[LOG] 🚀 Initializing modular mission system...\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"igaming\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"igaming\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ iGaming module registered successfully\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"casino\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"casino\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Casino module registered successfully\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"sportsbook\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"sportsbook\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Sportsbook module registered successfully\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"deposits\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"deposits\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Deposits module registered successfully\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"engagement\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"engagement\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Engagement module registered successfully\n"
+                        },
+                        {
+                          "text": "[ERROR] ❌ Failed to initialize modules: TypeError: _module_validators.forEach is not a function\n    at ModuleRegistry.validateModule (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:175:122)\n    at ModuleRegistry.register (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:26:33)\n    at initializeModules (webpack-internal:///(app-pages-browser)/./src/modules/index.ts:53:75)\n    at initializeSystem (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/index.tsx:59:87)\n    at eval (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/index.tsx:54:9)\n    at commitHookEffectListMount (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:21102:23)\n    at invokePassiveEffectMountInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23980:13)\n    at invokeEffectsInDev (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26852:9)\n    at legacyCommitDoubleInvokeEffectsInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26835:5)\n    at commitDoubleInvokeEffectsInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26816:7)\n    at flushPassiveEffectsImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26514:5)\n    at flushPassiveEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26438:14)\n    at eval (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26172:9)\n    at workLoop (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/scheduler/cjs/scheduler.development.js:256:34)\n    at flushWork (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/scheduler/cjs/scheduler.development.js:225:14)\n    at MessagePort.performWorkUntilDeadline (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/scheduler/cjs/scheduler.development.js:534:21)\n"
+                        },
+                        {
+                          "text": "[LOG] 🔧 Module initialization result: {success: false, error: _module_validators.forEach is not a function, modules: Array(0)}\n"
+                        },
+                        {
+                          "text": "[ERROR] ❌ Mission system initialization failed: _module_validators.forEach is not a function\n"
+                        },
+                        {
+                          "text": "[LOG] 🔧 Forcing initialization to proceed anyway for debugging...\n"
+                        },
+                        {
+                          "text": "✅ Successfully reached missions page\n"
+                        },
+                        {
+                          "text": "\n📋 Step 1: Checking for module initialization messages...\n"
+                        },
+                        {
+                          "text": "Found 20 module initialization logs:\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Module \"igaming\" registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ iGaming module registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Module \"casino\" registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Casino module registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Module \"sportsbook\" registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Sportsbook module registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Module \"deposits\" registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Deposits module registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Module \"engagement\" registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Engagement module registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Module \"igaming\" registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ iGaming module registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Module \"casino\" registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Casino module registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Module \"sportsbook\" registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Sportsbook module registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Module \"deposits\" registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Deposits module registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Module \"engagement\" registered successfully\n"
+                        },
+                        {
+                          "text": "  [LOG] ✅ Engagement module registered successfully\n"
+                        },
+                        {
+                          "text": "\n🎯 Step 2: Looking for \"Criar Missão do Zero\" button...\n"
+                        },
+                        {
+                          "text": "✅ Found \"Criar Missão do Zero\" button, clicking...\n"
+                        },
+                        {
+                          "text": "[LOG] 🔄 Starting module initialization...\n"
+                        },
+                        {
+                          "text": "[LOG] 🚀 Initializing modular mission system...\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"igaming\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"igaming\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ iGaming module registered successfully\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"casino\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"casino\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Casino module registered successfully\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"sportsbook\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"sportsbook\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Sportsbook module registered successfully\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"deposits\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"deposits\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Deposits module registered successfully\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"engagement\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"engagement\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Engagement module registered successfully\n"
+                        },
+                        {
+                          "text": "[ERROR] ❌ Failed to initialize modules: TypeError: _module_validators.forEach is not a function\n    at ModuleRegistry.validateModule (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:175:122)\n    at ModuleRegistry.register (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:26:33)\n    at initializeModules (webpack-internal:///(app-pages-browser)/./src/modules/index.ts:53:75)\n    at loadModuleData (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:89:91)\n    at eval (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:47:9)\n    at commitHookEffectListMount (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:21102:23)\n    at commitHookPassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23154:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23259:11)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n"
+                        },
+                        {
+                          "text": "[ERROR] ❌ Failed to initialize modules: _module_validators.forEach is not a function\n"
+                        },
+                        {
+                          "text": "[LOG] 🔄 Starting module initialization...\n"
+                        },
+                        {
+                          "text": "[LOG] 🚀 Initializing modular mission system...\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"igaming\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"igaming\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ iGaming module registered successfully\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"casino\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"casino\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Casino module registered successfully\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"sportsbook\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"sportsbook\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Sportsbook module registered successfully\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"deposits\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"deposits\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Deposits module registered successfully\n"
+                        },
+                        {
+                          "text": "[WARNING] Module \"engagement\" is being overwritten\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Module \"engagement\" registered successfully\n"
+                        },
+                        {
+                          "text": "[LOG] ✅ Engagement module registered successfully\n"
+                        },
+                        {
+                          "text": "[ERROR] ❌ Failed to initialize modules: TypeError: _module_validators.forEach is not a function\n    at ModuleRegistry.validateModule (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:175:122)\n    at ModuleRegistry.register (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:26:33)\n    at initializeModules (webpack-internal:///(app-pages-browser)/./src/modules/index.ts:53:75)\n    at loadModuleData (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:89:91)\n    at eval (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:47:9)\n    at commitHookEffectListMount (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:21102:23)\n    at invokePassiveEffectMountInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23980:13)\n    at invokeEffectsInDev (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26852:9)\n    at legacyCommitDoubleInvokeEffectsInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26835:5)\n    at commitDoubleInvokeEffectsInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26816:7)\n    at flushPassiveEffectsImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26514:5)\n    at flushPassiveEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26438:14)\n    at commitRootImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26337:5)\n    at commitRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26077:5)\n    at performSyncWorkOnRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:24925:3)\n    at flushSyncWorkAcrossRoots_impl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7758:13)\n    at flushSyncWorkOnAllRoots (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7718:3)\n    at processRootScheduleInMicrotask (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7863:3)\n    at eval (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:8034:7)\n"
+                        },
+                        {
+                          "text": "[ERROR] ❌ Failed to initialize modules: _module_validators.forEach is not a function\n"
+                        },
+                        {
+                          "text": "✅ Clicked \"Criar Missão do Zero\" button\n"
+                        },
+                        {
+                          "text": "Found 4 post-click logs:\n"
+                        },
+                        {
+                          "text": "  [LOG] 🔄 Starting module initialization...\n"
+                        },
+                        {
+                          "text": "  [ERROR] ❌ Failed to initialize modules: TypeError: _module_validators.forEach is not a function\n    at ModuleRegistry.validateModule (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:175:122)\n    at ModuleRegistry.register (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:26:33)\n    at initializeModules (webpack-internal:///(app-pages-browser)/./src/modules/index.ts:53:75)\n    at loadModuleData (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:89:91)\n    at eval (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:47:9)\n    at commitHookEffectListMount (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:21102:23)\n    at commitHookPassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23154:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23259:11)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n"
+                        },
+                        {
+                          "text": "  [LOG] 🔄 Starting module initialization...\n"
+                        },
+                        {
+                          "text": "  [ERROR] ❌ Failed to initialize modules: TypeError: _module_validators.forEach is not a function\n    at ModuleRegistry.validateModule (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:175:122)\n    at ModuleRegistry.register (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:26:33)\n    at initializeModules (webpack-internal:///(app-pages-browser)/./src/modules/index.ts:53:75)\n    at loadModuleData (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:89:91)\n    at eval (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:47:9)\n    at commitHookEffectListMount (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:21102:23)\n    at invokePassiveEffectMountInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23980:13)\n    at invokeEffectsInDev (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26852:9)\n    at legacyCommitDoubleInvokeEffectsInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26835:5)\n    at commitDoubleInvokeEffectsInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26816:7)\n    at flushPassiveEffectsImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26514:5)\n    at flushPassiveEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26438:14)\n    at commitRootImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26337:5)\n    at commitRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26077:5)\n    at performSyncWorkOnRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:24925:3)\n    at flushSyncWorkAcrossRoots_impl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7758:13)\n    at flushSyncWorkOnAllRoots (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7718:3)\n    at processRootScheduleInMicrotask (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7863:3)\n    at eval (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:8034:7)\n"
+                        },
+                        {
+                          "text": "\n🔧 Step 3: Looking for \"Adicionar Trigger\" button...\n"
+                        },
+                        {
+                          "text": "✅ Found \"Adicionar Trigger\" button, clicking...\n"
+                        },
+                        {
+                          "text": "✅ Clicked \"Adicionar Trigger\" button\n"
+                        },
+                        {
+                          "text": "\n📋 Step 4: Checking if events are loaded...\n"
+                        },
+                        {
+                          "text": "✅ Found 2 potential event options using selector: [class*=\"event\"]\n"
+                        },
+                        {
+                          "text": "📋 Available events:\n"
+                        },
+                        {
+                          "text": "  1. Logout\n"
+                        },
+                        {
+                          "text": "  2. Voltar\n"
+                        },
+                        {
+                          "text": "\n📊 Final Report:\n"
+                        },
+                        {
+                          "text": "================\n"
+                        },
+                        {
+                          "text": "Total console logs captured: 81\n"
+                        },
+                        {
+                          "text": "Errors: 11\n"
+                        },
+                        {
+                          "text": "Warnings: 15\n"
+                        },
+                        {
+                          "text": "Info/Log messages: 54\n"
+                        },
+                        {
+                          "text": "\n❌ Errors found:\n"
+                        },
+                        {
+                          "text": "  [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found)\n"
+                        },
+                        {
+                          "text": "  [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized)\n"
+                        },
+                        {
+                          "text": "  [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized)\n"
+                        },
+                        {
+                          "text": "  [ERROR] ❌ Failed to initialize modules: TypeError: _module_validators.forEach is not a function\n    at ModuleRegistry.validateModule (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:175:122)\n    at ModuleRegistry.register (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:26:33)\n    at initializeModules (webpack-internal:///(app-pages-browser)/./src/modules/index.ts:53:75)\n    at initializeSystem (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/index.tsx:59:87)\n    at eval (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/index.tsx:54:9)\n    at commitHookEffectListMount (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:21102:23)\n    at commitHookPassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23154:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23259:11)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n"
+                        },
+                        {
+                          "text": "  [ERROR] ❌ Mission system initialization failed: _module_validators.forEach is not a function\n"
+                        },
+                        {
+                          "text": "  [ERROR] ❌ Failed to initialize modules: TypeError: _module_validators.forEach is not a function\n    at ModuleRegistry.validateModule (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:175:122)\n    at ModuleRegistry.register (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:26:33)\n    at initializeModules (webpack-internal:///(app-pages-browser)/./src/modules/index.ts:53:75)\n    at initializeSystem (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/index.tsx:59:87)\n    at eval (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/index.tsx:54:9)\n    at commitHookEffectListMount (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:21102:23)\n    at invokePassiveEffectMountInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23980:13)\n    at invokeEffectsInDev (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26852:9)\n    at legacyCommitDoubleInvokeEffectsInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26835:5)\n    at commitDoubleInvokeEffectsInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26816:7)\n    at flushPassiveEffectsImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26514:5)\n    at flushPassiveEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26438:14)\n    at eval (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26172:9)\n    at workLoop (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/scheduler/cjs/scheduler.development.js:256:34)\n    at flushWork (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/scheduler/cjs/scheduler.development.js:225:14)\n    at MessagePort.performWorkUntilDeadline (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/scheduler/cjs/scheduler.development.js:534:21)\n"
+                        },
+                        {
+                          "text": "  [ERROR] ❌ Mission system initialization failed: _module_validators.forEach is not a function\n"
+                        },
+                        {
+                          "text": "  [ERROR] ❌ Failed to initialize modules: TypeError: _module_validators.forEach is not a function\n    at ModuleRegistry.validateModule (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:175:122)\n    at ModuleRegistry.register (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:26:33)\n    at initializeModules (webpack-internal:///(app-pages-browser)/./src/modules/index.ts:53:75)\n    at loadModuleData (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:89:91)\n    at eval (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:47:9)\n    at commitHookEffectListMount (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:21102:23)\n    at commitHookPassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23154:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23259:11)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23370:9)\n    at recursivelyTraversePassiveMountEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23237:7)\n    at commitPassiveMountOnFiber (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23256:9)\n"
+                        },
+                        {
+                          "text": "  [ERROR] ❌ Failed to initialize modules: _module_validators.forEach is not a function\n"
+                        },
+                        {
+                          "text": "  [ERROR] ❌ Failed to initialize modules: TypeError: _module_validators.forEach is not a function\n    at ModuleRegistry.validateModule (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:175:122)\n    at ModuleRegistry.register (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:26:33)\n    at initializeModules (webpack-internal:///(app-pages-browser)/./src/modules/index.ts:53:75)\n    at loadModuleData (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:89:91)\n    at eval (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:47:9)\n    at commitHookEffectListMount (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:21102:23)\n    at invokePassiveEffectMountInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23980:13)\n    at invokeEffectsInDev (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26852:9)\n    at legacyCommitDoubleInvokeEffectsInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26835:5)\n    at commitDoubleInvokeEffectsInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26816:7)\n    at flushPassiveEffectsImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26514:5)\n    at flushPassiveEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26438:14)\n    at commitRootImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26337:5)\n    at commitRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26077:5)\n    at performSyncWorkOnRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:24925:3)\n    at flushSyncWorkAcrossRoots_impl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7758:13)\n    at flushSyncWorkOnAllRoots (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7718:3)\n    at processRootScheduleInMicrotask (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7863:3)\n    at eval (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:8034:7)\n"
+                        },
+                        {
+                          "text": "  ... and 1 more errors\n"
+                        },
+                        {
+                          "text": "\n📋 Console logs (showing last 20):\n"
+                        },
+                        {
+                          "text": "==================================\n"
+                        },
+                        {
+                          "text": "62. [ERROR] ❌ Failed to initialize modules: _module_validators.forEach is not a function\n"
+                        },
+                        {
+                          "text": "63. [LOG] 🔄 Starting module initialization...\n"
+                        },
+                        {
+                          "text": "64. [LOG] 🚀 Initializing modular mission system...\n"
+                        },
+                        {
+                          "text": "65. [WARNING] Module \"igaming\" is being overwritten\n"
+                        },
+                        {
+                          "text": "66. [LOG] ✅ Module \"igaming\" registered successfully\n"
+                        },
+                        {
+                          "text": "67. [LOG] ✅ iGaming module registered successfully\n"
+                        },
+                        {
+                          "text": "68. [WARNING] Module \"casino\" is being overwritten\n"
+                        },
+                        {
+                          "text": "69. [LOG] ✅ Module \"casino\" registered successfully\n"
+                        },
+                        {
+                          "text": "70. [LOG] ✅ Casino module registered successfully\n"
+                        },
+                        {
+                          "text": "71. [WARNING] Module \"sportsbook\" is being overwritten\n"
+                        },
+                        {
+                          "text": "72. [LOG] ✅ Module \"sportsbook\" registered successfully\n"
+                        },
+                        {
+                          "text": "73. [LOG] ✅ Sportsbook module registered successfully\n"
+                        },
+                        {
+                          "text": "74. [WARNING] Module \"deposits\" is being overwritten\n"
+                        },
+                        {
+                          "text": "75. [LOG] ✅ Module \"deposits\" registered successfully\n"
+                        },
+                        {
+                          "text": "76. [LOG] ✅ Deposits module registered successfully\n"
+                        },
+                        {
+                          "text": "77. [WARNING] Module \"engagement\" is being overwritten\n"
+                        },
+                        {
+                          "text": "78. [LOG] ✅ Module \"engagement\" registered successfully\n"
+                        },
+                        {
+                          "text": "79. [LOG] ✅ Engagement module registered successfully\n"
+                        },
+                        {
+                          "text": "80. [ERROR] ❌ Failed to initialize modules: TypeError: _module_validators.forEach is not a function\n    at ModuleRegistry.validateModule (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:175:122)\n    at ModuleRegistry.register (webpack-internal:///(app-pages-browser)/./src/core/module-registry.ts:26:33)\n    at initializeModules (webpack-internal:///(app-pages-browser)/./src/modules/index.ts:53:75)\n    at loadModuleData (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:89:91)\n    at eval (webpack-internal:///(app-pages-browser)/./src/components/mission-builder/ModularRuleBuilder.tsx:47:9)\n    at commitHookEffectListMount (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:21102:23)\n    at invokePassiveEffectMountInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:23980:13)\n    at invokeEffectsInDev (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26852:9)\n    at legacyCommitDoubleInvokeEffectsInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26835:5)\n    at commitDoubleInvokeEffectsInDEV (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26816:7)\n    at flushPassiveEffectsImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26514:5)\n    at flushPassiveEffects (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26438:14)\n    at commitRootImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26337:5)\n    at commitRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26077:5)\n    at performSyncWorkOnRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:24925:3)\n    at flushSyncWorkAcrossRoots_impl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7758:13)\n    at flushSyncWorkOnAllRoots (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7718:3)\n    at processRootScheduleInMicrotask (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7863:3)\n    at eval (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:8034:7)\n"
+                        },
+                        {
+                          "text": "81. [ERROR] ❌ Failed to initialize modules: _module_validators.forEach is not a function\n"
+                        },
+                        {
+                          "text": "📸 Screenshot saved to test-results/module-initialization-final-screenshot.png\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-18T12:21:20.937Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d3dbcf524baa6fa4b0d2-29889563c904f3f2307b",
+              "file": "module-initialization-with-auth.spec.ts",
+              "line": 4,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-09-18T12:21:20.623Z",
+    "duration": 13818.035,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

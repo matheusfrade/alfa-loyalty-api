@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useMemo } from 'react'
-import { BaseCondition, ConditionGroup, FieldDefinition, Operator } from '../../core/types'
-import { Plus, Trash2, Move } from 'lucide-react'
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
+import { BaseCondition, ConditionGroup, FieldDefinition, Operator, BaseTrigger } from '../../core/types'
+import { Plus, Trash2, Move, Search, X, ChevronDown } from 'lucide-react'
 
 interface AdvancedConditionBuilderProps {
   initialConditionTree?: ConditionGroup
@@ -8,6 +8,10 @@ interface AdvancedConditionBuilderProps {
   availableFieldsGrouped?: Record<string, { field: FieldDefinition; displayLabel: string }[]>
   onChange: (conditionTree: ConditionGroup) => void
   className?: string
+  placeholder?: string
+  // NEW: Include triggers to show in logic preview
+  triggers?: BaseTrigger[]
+  triggerLogic?: 'AND' | 'OR'
 }
 
 interface ConditionItemProps {
@@ -21,12 +25,213 @@ interface ConditionItemProps {
   level: number
 }
 
+// Field Search Component
+interface FieldSearchProps {
+  value: string
+  onChange: (value: string) => void
+  availableFields: FieldDefinition[]
+  availableFieldsGrouped?: Record<string, { field: FieldDefinition; displayLabel: string }[]>
+  placeholder?: string
+}
+
+function FieldSearchInput({
+  value,
+  onChange,
+  availableFields,
+  availableFieldsGrouped,
+  placeholder = "Buscar campo..."
+}: FieldSearchProps) {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [filteredOptions, setFilteredOptions] = useState<Array<{ value: string; label: string; category?: string }>>([])
+  const inputRef = useRef<HTMLInputElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Build options list
+  const allOptions = useMemo(() => {
+    const options: Array<{ value: string; label: string; category?: string }> = []
+
+    if (availableFieldsGrouped) {
+      Object.entries(availableFieldsGrouped).forEach(([category, items]) => {
+        items.forEach(item => {
+          options.push({
+            value: item.field.name,
+            label: item.displayLabel,
+            category
+          })
+        })
+      })
+    } else {
+      availableFields.forEach(field => {
+        options.push({
+          value: field.name,
+          label: field.label
+        })
+      })
+    }
+
+    return options
+  }, [availableFields, availableFieldsGrouped])
+
+  // Filter options based on search
+  useEffect(() => {
+    if (!searchQuery || searchQuery.length < 2) {
+      setFilteredOptions(allOptions)
+    } else {
+      const filtered = allOptions.filter(option =>
+        option.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        option.value.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        option.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      setFilteredOptions(filtered)
+    }
+  }, [searchQuery, allOptions])
+
+  // Get current field label
+  const currentField = allOptions.find(opt => opt.value === value)
+  const displayValue = currentField ? currentField.label : ''
+
+  // Handle click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleSelect = (option: { value: string; label: string }) => {
+    onChange(option.value)
+    setShowDropdown(false)
+    setSearchQuery('')
+  }
+
+  const handleClear = () => {
+    onChange('')
+    setShowDropdown(false)
+    setSearchQuery('')
+  }
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      {/* Display/Search Input */}
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="text"
+          value={showDropdown ? searchQuery : displayValue}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onFocus={() => setShowDropdown(true)}
+          placeholder={placeholder}
+          className="w-full px-2 py-1 pr-8 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+        <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+          {value ? (
+            <button
+              type="button"
+              onClick={handleClear}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X size={12} />
+            </button>
+          ) : (
+            <ChevronDown size={12} className="text-gray-400" />
+          )}
+        </div>
+      </div>
+
+      {/* Dropdown */}
+      {showDropdown && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+          {filteredOptions.length > 0 ? (
+            <div className="py-1">
+              {availableFieldsGrouped ? (
+                // Grouped display
+                (() => {
+                  const grouped: Record<string, Array<{ value: string; label: string }>> = {}
+                  filteredOptions.forEach(option => {
+                    const category = option.category || 'Outros'
+                    if (!grouped[category]) grouped[category] = []
+                    grouped[category].push(option)
+                  })
+
+                  return Object.entries(grouped).map(([category, options]) => (
+                    <div key={category}>
+                      <div className="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-50">
+                        {category}
+                      </div>
+                      {options.map(option => (
+                        <button
+                          key={option.value}
+                          onClick={() => handleSelect(option)}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 focus:bg-blue-50 focus:outline-none"
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  ))
+                })()
+              ) : (
+                // Simple list
+                filteredOptions.map(option => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleSelect(option)}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 focus:bg-blue-50 focus:outline-none"
+                  >
+                    {option.label}
+                  </button>
+                ))
+              )}
+            </div>
+          ) : (
+            <div className="py-2 px-3 text-sm text-gray-500">
+              Nenhum campo encontrado
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Custom hook for debounced preview
+const useDebouncedPreview = (condition: BaseCondition, delay: number = 800) => {
+  const [shouldShowPreview, setShouldShowPreview] = useState(false)
+
+  useEffect(() => {
+    const hasAllFields = condition.field && condition.operator && condition.value
+
+    if (hasAllFields) {
+      const timer = setTimeout(() => {
+        setShouldShowPreview(true)
+      }, delay)
+
+      return () => {
+        clearTimeout(timer)
+        setShouldShowPreview(false)
+      }
+    } else {
+      setShouldShowPreview(false)
+    }
+  }, [condition.field, condition.operator, condition.value, delay])
+
+  return shouldShowPreview
+}
+
 export function AdvancedConditionBuilder({
   initialConditionTree,
   availableFields,
   availableFieldsGrouped,
   onChange,
-  className = ''
+  className = '',
+  placeholder,
+  triggers = [],
+  triggerLogic = 'AND'
 }: AdvancedConditionBuilderProps) {
   const [conditionTree, setConditionTree] = useState<ConditionGroup>(
     initialConditionTree || {
@@ -38,6 +243,13 @@ export function AdvancedConditionBuilder({
       }]
     }
   )
+
+  // Update state when initialConditionTree prop changes
+  useEffect(() => {
+    if (initialConditionTree) {
+      setConditionTree(initialConditionTree)
+    }
+  }, [initialConditionTree])
 
   const updateConditionTree = (newTree: ConditionGroup) => {
     setConditionTree(newTree)
@@ -102,7 +314,11 @@ export function AdvancedConditionBuilder({
           <input
             type="number"
             value={value || ''}
-            onChange={(e) => onChange(Number(e.target.value))}
+            onChange={(e) => {
+              const val = e.target.value
+              // Allow empty string or convert to number
+              onChange(val === '' ? '' : Number(val))
+            }}
             placeholder={field.placeholder}
             min={field.validation?.min}
             max={field.validation?.max}
@@ -245,6 +461,7 @@ export function AdvancedConditionBuilder({
     } else {
       const condition = item as BaseCondition
       const selectedField = availableFields.find(f => f.name === condition.field)
+      const shouldShowPreview = useDebouncedPreview(condition, 800)
       
       return (
         <div className={`bg-white border-l-4 border-l-gray-300 border border-gray-200 rounded-r p-3 ${indentClass} transition-all duration-200 hover:border-blue-300 hover:border-l-blue-400 hover:shadow-sm group relative`}>
@@ -263,32 +480,13 @@ export function AdvancedConditionBuilder({
           <div className="grid grid-cols-3 gap-2">
             {/* Field Selection */}
             <div>
-              <select
+              <FieldSearchInput
                 value={condition.field || ''}
-                onChange={(e) => onUpdate({ ...condition, field: e.target.value })}
-                className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="">Selecione o campo...</option>
-                {availableFieldsGrouped ? (
-                  // Use grouped fields if available
-                  Object.entries(availableFieldsGrouped).map(([category, items]) => (
-                    <optgroup key={category} label={category}>
-                      {items.map(item => (
-                        <option key={item.field.name} value={item.field.name}>
-                          {item.displayLabel}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))
-                ) : (
-                  // Fallback to simple list
-                  availableFields.map(field => (
-                    <option key={field.name} value={field.name}>
-                      {field.label}
-                    </option>
-                  ))
-                )}
-              </select>
+                onChange={(value) => onUpdate({ ...condition, field: value })}
+                availableFields={availableFields}
+                availableFieldsGrouped={availableFieldsGrouped}
+                placeholder="Buscar campo..."
+              />
             </div>
             
             {/* Operator Selection */}
@@ -360,8 +558,8 @@ export function AdvancedConditionBuilder({
               💡 Use "E também" para adicionar uma condição que deve acontecer junto com esta
             </div>
             
-            {/* Preview hint - only show when condition is filled */}
-            {condition.field && condition.operator && condition.value && (
+            {/* Preview hint - only show when condition is filled and debounced */}
+            {shouldShowPreview && (
               <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
                 <div className="text-blue-700 font-medium">Prévia desta condição:</div>
                 <div className="text-blue-600 font-mono mt-1">
@@ -561,26 +759,6 @@ export function AdvancedConditionBuilder({
         )
       })()}
 
-      {/* Logic Preview */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="text-sm font-medium text-blue-900">
-            💡 Lógica Final:
-          </div>
-          <div className="text-xs text-blue-600">
-            {(() => {
-              const conditionCount = JSON.stringify(conditionTree).split('"field":').length - 1
-              return `${conditionCount} condição${conditionCount !== 1 ? 'ões' : ''}`
-            })()}
-          </div>
-        </div>
-        <div className="bg-white rounded border shadow-sm">
-          {generateLogicExpression(conditionTree)}
-        </div>
-        <div className="text-xs text-blue-600 mt-2">
-          ✨ Esta é a lógica que será aplicada para validar se uma missão foi completada
-        </div>
-      </div>
       
     </div>
   )

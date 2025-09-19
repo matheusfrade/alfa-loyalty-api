@@ -46,41 +46,23 @@ export default function ProgramsPage() {
 
   const loadPrograms = async () => {
     try {
-      // For now, simulate data since we don't have the API endpoint yet
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      const mockPrograms: Program[] = [
-        {
-          id: '1',
-          name: 'Alfa Gaming Loyalty',
-          slug: 'alfa-gaming',
-          type: 'GAMING',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          _count: {
-            users: 125,
-            missions: 15,
-            products: 28
-          }
-        },
-        {
-          id: '2',
-          name: 'E-commerce Rewards',
-          slug: 'ecommerce-demo',
-          type: 'ECOMMERCE',
-          isActive: false,
-          createdAt: new Date().toISOString(),
-          _count: {
-            users: 0,
-            missions: 5,
-            products: 10
-          }
-        }
-      ]
-      
-      setPrograms(mockPrograms)
+      const response = await fetch('/api/admin/programs')
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch programs')
+      }
+
+      const result = await response.json()
+
+      if (result.programs) {
+        setPrograms(result.programs)
+      } else {
+        throw new Error('Invalid response format')
+      }
     } catch (error) {
       console.error('Failed to load programs:', error)
+      // Fallback to empty state on error
+      setPrograms([])
     } finally {
       setLoading(false)
     }

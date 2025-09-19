@@ -60,100 +60,126 @@ async function main() {
     }
   })
 
-  // Create tiers for Alfa Gaming
+  // Create period policy for advanced tier system
+  const periodPolicy = await prisma.periodPolicy.create({
+    data: {
+      programId: alfaProgram.id,
+      periodType: 'SEMESTRE',
+      pointsExpireAfterM: 12,
+      softResetFactor: 0.5,
+      reviewCron: '0 0 1 1,7 *', // 1st of January and July
+      isActive: true,
+    }
+  })
+
+  // Create tiers for Alfa Gaming with advanced points system
   const tiers = await Promise.all([
     prisma.tier.create({
       data: {
         programId: alfaProgram.id,
-        name: 'Iniciante',
+        name: 'Bronze',
         level: 0,
-        requiredXP: 0,
-        color: '#6b7280',
+        requiredXP: 0, // Mantido para compatibilidade
+        minPoints: 0,
+        maxPoints: 999,
+        maintenancePoints: 500,
+        color: '#CD7F32',
+        icon: '🥉',
         multiplier: 1.0,
         benefits: JSON.stringify([
           'Acesso básico ao programa',
           'Missões diárias',
           'Loja de recompensas',
         ]),
-      }
-    }),
-    prisma.tier.create({
-      data: {
-        programId: alfaProgram.id,
-        name: 'Bronze',
-        level: 1,
-        requiredXP: 100,
-        color: '#CD7F32',
-        multiplier: 1.2,
-        benefits: JSON.stringify([
-          'Multiplicador 1.2x em coins',
-          'Missões exclusivas Bronze',
-          'Suporte prioritário',
-        ]),
+        isInviteOnly: false,
+        isActive: true,
       }
     }),
     prisma.tier.create({
       data: {
         programId: alfaProgram.id,
         name: 'Prata',
-        level: 2,
-        requiredXP: 500,
+        level: 1,
+        requiredXP: 1000, // Mantido para compatibilidade
+        minPoints: 1000,
+        maxPoints: 4999,
+        maintenancePoints: 2000,
         color: '#C0C0C0',
-        multiplier: 1.5,
+        icon: '🥈',
+        multiplier: 1.2,
         benefits: JSON.stringify([
-          'Multiplicador 1.5x em coins',
+          'Multiplicador 1.2x em coins',
           'Missões exclusivas Prata',
-          'Cashback semanal 2%',
+          'Suporte prioritário',
         ]),
+        isInviteOnly: false,
+        isActive: true,
       }
     }),
     prisma.tier.create({
       data: {
         programId: alfaProgram.id,
         name: 'Ouro',
-        level: 3,
-        requiredXP: 1500,
+        level: 2,
+        requiredXP: 5000, // Mantido para compatibilidade
+        minPoints: 5000,
+        maxPoints: 14999,
+        maintenancePoints: 7000,
         color: '#FFD700',
-        multiplier: 2.0,
+        icon: '🥇',
+        multiplier: 1.5,
         benefits: JSON.stringify([
-          'Multiplicador 2x em coins',
+          'Multiplicador 1.5x em coins',
           'Missões exclusivas Ouro',
-          'Cashback semanal 5%',
-          'Produtos exclusivos na loja',
+          'Cashback semanal 2%',
         ]),
+        isInviteOnly: false,
+        isActive: true,
       }
     }),
     prisma.tier.create({
       data: {
         programId: alfaProgram.id,
-        name: 'Diamante',
-        level: 4,
-        requiredXP: 5000,
-        color: '#B9F2FF',
-        multiplier: 2.5,
+        name: 'Platina',
+        level: 3,
+        requiredXP: 15000, // Mantido para compatibilidade
+        minPoints: 15000,
+        maxPoints: 49999,
+        maintenancePoints: 20000,
+        color: '#E5E4E2',
+        icon: '💎',
+        multiplier: 2.0,
         benefits: JSON.stringify([
-          'Multiplicador 2.5x em coins',
-          'Missões VIP',
-          'Cashback semanal 10%',
-          'Acesso a eventos exclusivos',
+          'Multiplicador 2x em coins',
+          'Missões exclusivas Platina',
+          'Cashback semanal 5%',
+          'Produtos exclusivos na loja',
         ]),
+        isInviteOnly: false,
+        isActive: true,
       }
     }),
     prisma.tier.create({
       data: {
         programId: alfaProgram.id,
         name: 'VIP',
-        level: 5,
-        requiredXP: 15000,
+        level: 4,
+        requiredXP: 50000, // Mantido para compatibilidade
+        minPoints: 50000,
+        maxPoints: null, // Sem limite superior
+        maintenancePoints: 60000,
         color: '#9333EA',
-        multiplier: 3.0,
+        icon: '👑',
+        multiplier: 2.5,
         benefits: JSON.stringify([
-          'Multiplicador 3x em coins',
+          'Multiplicador 2.5x em coins',
           'Todas as missões disponíveis',
-          'Cashback semanal 15%',
+          'Cashback semanal 10%',
           'Gerente de conta dedicado',
           'Convites para eventos presenciais',
         ]),
+        isInviteOnly: false,
+        isActive: true,
       }
     }),
   ])
@@ -370,9 +396,9 @@ async function main() {
     }),
   ])
 
-  // Create test users
+  // Create test users with advanced tier system
   const testUsers = []
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 20; i++) { // Increased to 20 users for better distribution
     const userPassword = await bcrypt.hash(`user${i}123`, 10)
     const user = await prisma.user.create({
       data: {
@@ -385,8 +411,27 @@ async function main() {
     })
     testUsers.push(user)
 
-    // Add users to program with different tiers
-    const tierIndex = Math.min(i - 1, tiers.length - 1)
+    // Distribute users across tiers with realistic distribution
+    let tierIndex = 0
+    let pointsLive = 0
+
+    if (i <= 10) { // 50% Bronze
+      tierIndex = 0
+      pointsLive = Math.floor(Math.random() * 900) + 100 // 100-999 points
+    } else if (i <= 15) { // 25% Prata
+      tierIndex = 1
+      pointsLive = Math.floor(Math.random() * 3000) + 1500 // 1500-4500 points
+    } else if (i <= 18) { // 15% Ouro
+      tierIndex = 2
+      pointsLive = Math.floor(Math.random() * 8000) + 7000 // 7000-15000 points
+    } else if (i <= 19) { // 5% Platina
+      tierIndex = 3
+      pointsLive = Math.floor(Math.random() * 20000) + 20000 // 20000-40000 points
+    } else { // 5% VIP (alerta de inflação)
+      tierIndex = 4
+      pointsLive = Math.floor(Math.random() * 50000) + 70000 // 70000-120000 points
+    }
+
     const userProgram = await prisma.userProgram.create({
       data: {
         userId: user.id,
@@ -397,7 +442,110 @@ async function main() {
       }
     })
 
-    // No preset mission data - missions will be created via Mission Builder
+    // Create points ledger entries for this user
+    const pointsEntries = []
+    let runningBalance = 0
+    const now = new Date()
+
+    // Add initial points (distributed over the last 6 months)
+    for (let j = 0; j < Math.floor(Math.random() * 8) + 3; j++) {
+      const pointsAmount = Math.floor(Math.random() * (pointsLive / 3)) + 100
+      const daysAgo = Math.floor(Math.random() * 180) // Last 6 months
+      const occurredAt = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000))
+      const expiresAt = new Date(occurredAt.getTime() + (365 * 24 * 60 * 60 * 1000)) // 1 year expiry
+
+      runningBalance += pointsAmount
+
+      pointsEntries.push({
+        playerId: user.id,
+        programId: alfaProgram.id,
+        source: ['MISSION', 'BONUS', 'PURCHASE', 'REFERRAL'][Math.floor(Math.random() * 4)],
+        amount: pointsAmount,
+        balance: runningBalance,
+        reference: null,
+        description: `Points earned via ${['mission completion', 'bonus reward', 'purchase activity', 'referral'][j % 4]}`,
+        occurredAt,
+        expiresAt,
+        isExpired: false,
+        meta: JSON.stringify({
+          source: 'seed',
+          userTier: tiers[tierIndex].name
+        })
+      })
+    }
+
+    // Add some expired points (to show expiration functionality)
+    if (Math.random() > 0.7) { // 30% of users have expired points
+      const expiredAmount = Math.floor(Math.random() * 500) + 100
+      const expiredDate = new Date(now.getTime() - (400 * 24 * 60 * 60 * 1000)) // 400 days ago
+
+      pointsEntries.push({
+        playerId: user.id,
+        programId: alfaProgram.id,
+        source: 'BONUS',
+        amount: expiredAmount,
+        balance: runningBalance + expiredAmount,
+        reference: null,
+        description: 'Expired promotional points',
+        occurredAt: expiredDate,
+        expiresAt: new Date(expiredDate.getTime() + (365 * 24 * 60 * 60 * 1000)),
+        isExpired: true,
+        meta: JSON.stringify({
+          source: 'seed',
+          expired: true
+        })
+      })
+    }
+
+    // Add points expiring soon (to show upcoming expirations)
+    if (Math.random() > 0.6) { // 40% of users have points expiring soon
+      const soonExpireAmount = Math.floor(Math.random() * 800) + 200
+      const soonExpireDate = new Date(now.getTime() - (330 * 24 * 60 * 60 * 1000)) // 330 days ago
+      const soonExpiresAt = new Date(soonExpireDate.getTime() + (365 * 24 * 60 * 60 * 1000)) // Expires in ~35 days
+
+      runningBalance += soonExpireAmount
+
+      pointsEntries.push({
+        playerId: user.id,
+        programId: alfaProgram.id,
+        source: 'MISSION',
+        amount: soonExpireAmount,
+        balance: runningBalance,
+        reference: null,
+        description: 'Mission rewards (expiring soon)',
+        occurredAt: soonExpireDate,
+        expiresAt: soonExpiresAt,
+        isExpired: false,
+        meta: JSON.stringify({
+          source: 'seed',
+          expiringSoon: true
+        })
+      })
+    }
+
+    // Create ledger entries
+    for (const entry of pointsEntries) {
+      await prisma.playerPointsLedger.create({
+        data: entry
+      })
+    }
+
+    // Create current period progress
+    const currentPeriodStart = new Date(now.getFullYear(), 0, 1) // Start of current year
+    const currentPeriodEnd = new Date(now.getFullYear(), 11, 31) // End of current year
+
+    await prisma.playerTierProgress.create({
+      data: {
+        playerId: user.id,
+        programId: alfaProgram.id,
+        tierId: tiers[tierIndex].id,
+        periodStart: currentPeriodStart,
+        periodEnd: currentPeriodEnd,
+        pointsEarned: Math.floor(pointsLive * 0.7), // 70% earned in current period
+        pointsCarry: Math.floor(pointsLive * 0.3), // 30% carried from previous
+        isCurrent: true
+      }
+    })
 
     // Add some transactions
     await prisma.transaction.create({

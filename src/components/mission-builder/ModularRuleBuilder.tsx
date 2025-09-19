@@ -2,13 +2,15 @@
 // Dynamically builds rule creation UI based on selected module
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { getAllEventTypesForUI, getModule } from '../../modules'
+import { getAllEventTypesForUI, getModule, initializeModules } from '../../modules'
 import type { BaseMissionRule, EventTypeDefinition, FieldDefinition, ConditionGroup, BaseTrigger } from '../../core/types'
 import { AdvancedConditionBuilder } from './AdvancedConditionBuilder'
 import { TriggerConfigurator } from './TriggerConfigurator'
 import { MissionPreview } from './MissionPreview'
 import { InfoTooltip } from '../ui/info-tooltip'
-import { Lightbulb, AlertCircle, Plus, Layers, Zap } from 'lucide-react'
+import { EventSelector } from './EventSelector'
+import { Lightbulb, AlertCircle, Plus, Layers, Zap, Search, X } from 'lucide-react'
+import { BUSINESS_RULES_FIELD_DEFINITIONS } from '../../modules/business-rules/types'
 
 interface ModularRuleBuilderProps {
   moduleName?: string // Now optional since we'll use all modules
@@ -33,6 +35,7 @@ export function ModularRuleBuilder({
 }: ModularRuleBuilderProps) {
   const [eventTypes, setEventTypes] = useState<EventTypeUI[]>([])
   const [showEventSelector, setShowEventSelector] = useState(false)
+  const [eventSearchQuery, setEventSearchQuery] = useState('')
   const [currentRule, setCurrentRule] = useState<BaseMissionRule>(
     initialRule || {
       triggers: [],
@@ -84,48 +87,84 @@ export function ModularRuleBuilder({
   const loadModuleData = async () => {
     try {
       setLoading(true)
-      
+      console.log('🚀 ModularRuleBuilder: Starting to load module data...')
+
       // Initialize modules first
-      const { initializeModules } = await import('../../modules')
-      const initResult = initializeModules()
-      
-      if (!initResult.success) {
-        console.error('Failed to initialize modules:', initResult.error)
-        return
+      console.log('🔄 Starting module initialization...')
+
+      try {
+        const initResult = initializeModules()
+        console.log('📊 Initialize modules result:', initResult)
+
+        if (!initResult.success) {
+          console.error('❌ Failed to initialize modules:', initResult.error)
+          console.error('❌ Full error details:', initResult)
+          return
+        }
+
+        console.log('✅ Modules initialized successfully:', initResult.stats)
+
+        // Load event types from ALL modules
+        console.log('📋 Getting all event types for UI...')
+        const allEventTypes = getAllEventTypesForUI(locale)
+        console.log('📋 Loaded event types count:', allEventTypes.length)
+        console.log('📋 Event types sample:', allEventTypes.slice(0, 3))
+        console.log('📋 All categories found:', [...new Set(allEventTypes.map(e => e.category))])
+
+        setEventTypes(allEventTypes)
+        console.log('✅ Event types set in state')
+      } catch (moduleError) {
+        console.error('❌ Error during module initialization:', moduleError)
+        console.error('❌ Module error stack:', moduleError.stack)
       }
-      
-      // Load event types from ALL modules
-      const allEventTypes = getAllEventTypesForUI(locale)
-      setEventTypes(allEventTypes)
-      
+
     } catch (error) {
-      console.error('Failed to load module data:', error)
+      console.error('❌ Failed to load module data:', error)
+      console.error('❌ Error stack:', error.stack)
     } finally {
+      console.log('🏁 ModularRuleBuilder: Load module data completed, setting loading to false')
       setLoading(false)
     }
   }
 
   const addTrigger = (eventKey: string) => {
     // Check if trigger already exists
-    if (currentRule.triggers.some(t => t.event === eventKey)) {
+    if (currentRule.triggers && currentRule.triggers.some(t => t.event === eventKey)) {
       return
     }
-    
+
     const newTrigger: BaseTrigger = {
       event: eventKey,
       filters: [],
       conditions: []
     }
-    
+
     setCurrentRule({
       ...currentRule,
       triggers: [...currentRule.triggers, newTrigger]
     })
     setShowEventSelector(false)
+    setEventSearchQuery('') // Clear search when closing
+  }
+
+  // Filter events based on search query
+  const filterEvents = (events: EventTypeUI[], query: string): EventTypeUI[] => {
+    // Always show all events if no query, or filter if there is a query
+    if (!query || query.trim() === '') {
+      return events
+    }
+
+    const searchTerm = query.toLowerCase().trim()
+    return events.filter(event =>
+      event.label.toLowerCase().includes(searchTerm) ||
+      event.description.toLowerCase().includes(searchTerm) ||
+      event.key.toLowerCase().includes(searchTerm) ||
+      event.category?.toLowerCase().includes(searchTerm)
+    )
   }
 
   const removeTrigger = (index: number) => {
-    const newTriggers = currentRule.triggers.filter((_, i) => i !== index)
+    const newTriggers = currentRule.triggers ? currentRule.triggers.filter((_, i) => i !== index) : []
     setCurrentRule({ ...currentRule, triggers: newTriggers })
   }
 
@@ -257,108 +296,79 @@ export function ModularRuleBuilder({
     }
   ], [])
 
-  // Compute available fields and grouped fields
+  // UNIFIED ARCHITECTURE: Business Rules fields ONLY for advanced conditions
+  // This eliminates duplication - event fields go in trigger filters, business rules go here
   const { availableFields, availableFieldsGrouped } = useMemo(() => {
     const fieldMap = new Map<string, FieldDefinition>()
     const grouped: Record<string, { field: FieldDefinition; displayLabel: string }[]> = {}
-    const fieldNameCount: Record<string, string[]> = {}
-    
-    // Process ALL event types to get ALL fields (not just from triggers)
-    let hasFields = false
-    
-    // First pass: collect ALL fields from ALL event types
-    eventTypes.forEach(eventType => {
-      if (eventType?.fields) {
-        const categoryShort = 
-          eventType.category === 'sportsbook' || eventType.category === 'betting' ? 'Sportsbook' :
-          eventType.category === 'casino' || eventType.category === 'gameplay' ? 'Casino' :
-          eventType.category === 'achievement' ? 'Conquistas' :
-          eventType.category === 'general' ? 'Geral' : 'Outros'
-        
-        eventType.fields.forEach(field => {
-          hasFields = true
-          if (!fieldMap.has(field.name)) {
-            fieldMap.set(field.name, field)
-          }
-          if (!fieldNameCount[field.name]) {
-            fieldNameCount[field.name] = []
-          }
-          if (!fieldNameCount[field.name].includes(categoryShort)) {
-            fieldNameCount[field.name].push(categoryShort)
-          }
-        })
-      }
+
+    // ONLY USE BUSINESS RULES FIELDS - NO EVENT FIELDS
+    // This implements the 95% (triggers) vs 5% (business rules) architecture
+    BUSINESS_RULES_FIELD_DEFINITIONS.forEach(field => {
+      fieldMap.set(field.name, field)
     })
-    
-    // Second pass: create grouped structure using ALL event types
-    eventTypes.forEach(eventType => {
-      if (eventType?.fields) {
-        let categoryLabel = '💰 Geral'
-        let categoryShort = 'Geral'
-        
-        if (eventType.category === 'sportsbook' || eventType.category === 'betting') {
-          categoryLabel = '⚽ Sportsbook'
-          categoryShort = 'Sportsbook'
-        } else if (eventType.category === 'casino' || eventType.category === 'gameplay') {
-          categoryLabel = '🎰 Casino'
-          categoryShort = 'Casino'
-        } else if (eventType.category === 'achievement') {
-          categoryLabel = '🏆 Conquistas'
-          categoryShort = 'Conquistas'
-        } else if (eventType.category === 'general') {
-          categoryLabel = '💰 Geral'
-          categoryShort = 'Geral'
-        }
-        
-        if (!grouped[categoryLabel]) {
-          grouped[categoryLabel] = []
-        }
-        
-        eventType.fields.forEach(field => {
-          // Create unique field ID by combining original name with category
-          const uniqueFieldId = `${field.name}_${categoryShort.toLowerCase()}`
-          const uniqueField = { 
-            ...field, 
-            name: uniqueFieldId,
-            originalName: field.name 
-          }
-          
-          // Add to field map with unique ID
-          fieldMap.set(uniqueFieldId, uniqueField)
-          
-          // Check if we already have this specific field in this category
-          const alreadyAdded = grouped[categoryLabel].some(f => f.field.name === uniqueFieldId)
-          if (!alreadyAdded) {
-            const categoriesWithField = fieldNameCount[field.name] || []
-            const needsSuffix = categoriesWithField.length > 1
-            const displayLabel = needsSuffix ? `${field.label} (${categoryShort})` : field.label
-            
-            grouped[categoryLabel].push({
-              field: uniqueField,
-              displayLabel
-            })
-          }
-        })
-      }
-    })
-    
-    // If no fields from triggers, use generic fields
-    if (!hasFields) {
-      genericFields.forEach(field => {
-        fieldMap.set(field.name, field)
-      })
-      
-      grouped['Campos Genéricos'] = genericFields.map(field => ({
-        field,
-        displayLabel: field.label
-      }))
-    }
-    
+
+    // Group business rules fields by category
+    const userProfileFields = BUSINESS_RULES_FIELD_DEFINITIONS.filter(f =>
+      ['user_tier', 'vip_level', 'account_age', 'account_status'].includes(f.name)
+    )
+
+    const verificationFields = BUSINESS_RULES_FIELD_DEFINITIONS.filter(f =>
+      ['kyc_verified', 'phone_verified', 'email_verified'].includes(f.name)
+    )
+
+    const geographicFields = BUSINESS_RULES_FIELD_DEFINITIONS.filter(f =>
+      ['region', 'timezone'].includes(f.name)
+    )
+
+    const limitsFields = BUSINESS_RULES_FIELD_DEFINITIONS.filter(f =>
+      ['daily_bet_limit', 'monthly_deposit_limit', 'withdrawal_limit_daily'].includes(f.name)
+    )
+
+    const historicalFields = BUSINESS_RULES_FIELD_DEFINITIONS.filter(f =>
+      ['total_deposits', 'total_withdrawals', 'total_bets_amount', 'total_wins_amount'].includes(f.name)
+    )
+
+    const behaviorFields = BUSINESS_RULES_FIELD_DEFINITIONS.filter(f =>
+      ['preferred_device', 'login_count_7d', 'bet_count_30d', 'registration_date', 'last_login', 'last_deposit_date', 'last_bet_date'].includes(f.name)
+    )
+
+    // Populate grouped fields
+    grouped['👤 Perfil do Usuário'] = userProfileFields.map(field => ({
+      field,
+      displayLabel: field.label
+    }))
+
+    grouped['✅ Verificações'] = verificationFields.map(field => ({
+      field,
+      displayLabel: field.label
+    }))
+
+    grouped['🌍 Geográfico'] = geographicFields.map(field => ({
+      field,
+      displayLabel: field.label
+    }))
+
+    grouped['📊 Limites & Controles'] = limitsFields.map(field => ({
+      field,
+      displayLabel: field.label
+    }))
+
+    grouped['💰 Dados Históricos'] = historicalFields.map(field => ({
+      field,
+      displayLabel: field.label
+    }))
+
+    grouped['📱 Comportamento'] = behaviorFields.map(field => ({
+      field,
+      displayLabel: field.label
+    }))
+
     return {
       availableFields: Array.from(fieldMap.values()),
       availableFieldsGrouped: grouped
     }
-  }, [eventTypes, genericFields])
+  }, []) // No dependencies - business rules are static
 
   const renderFieldInput = (field: FieldDefinition, value: any, onChange: (value: any) => void, compact: boolean = false) => {
     const fieldId = `field-${field.name}`
@@ -486,76 +496,33 @@ export function ModularRuleBuilder({
       {/* Event Selector Modal */}
       {showEventSelector && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Selecione um Evento</h3>
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden">
+              <div className="flex items-center justify-between p-6 border-b">
+                <h2 className="text-xl font-semibold text-gray-900">Adicionar Trigger</h2>
                 <button
-                  onClick={() => setShowEventSelector(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    setShowEventSelector(false)
+                    setEventSearchQuery('')
+                  }}
+                  className="text-gray-400 hover:text-gray-600 p-1 rounded"
                 >
-                  ✕
+                  <X size={24} />
                 </button>
               </div>
-              
-              {(() => {
-                const groupedEvents: Record<string, EventTypeUI[]> = {}
-                const categoryInfo: Record<string, { icon: string; label: string }> = {
-                  'sportsbook': { icon: '⚽', label: 'Sportsbook' },
-                  'casino': { icon: '🎰', label: 'Cassino' },
-                  'live_casino': { icon: '🎲', label: 'Casino Ao Vivo' },
-                  'general': { icon: '💰', label: 'Geral' }
-                }
-                
-                eventTypes.forEach(event => {
-                  const category = event.category || 'general'
-                  if (!groupedEvents[category]) {
-                    groupedEvents[category] = []
-                  }
-                  groupedEvents[category].push(event)
-                })
-                
-                return Object.entries(groupedEvents).map(([category, events]) => (
-                  <div key={category} className="mb-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg">
-                        {categoryInfo[category]?.icon || '📌'}
-                      </span>
-                      <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                        {categoryInfo[category]?.label || category}
-                      </h4>
-                      <div className="flex-1 h-px bg-gray-200"></div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      {events.map(eventType => {
-                        const isAlreadyAdded = currentRule.triggers.some(t => t.event === eventType.key)
-                        return (
-                          <button
-                            key={eventType.key}
-                            onClick={() => !isAlreadyAdded && addTrigger(eventType.key)}
-                            disabled={isAlreadyAdded}
-                            className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
-                              isAlreadyAdded
-                                ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
-                                : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50 cursor-pointer'
-                            }`}
-                          >
-                            <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-xl">
-                              {eventType.icon}
-                            </div>
-                            <div className="text-left flex-1">
-                              <h5 className="text-sm font-medium text-gray-900">{eventType.label}</h5>
-                              <p className="text-xs text-gray-600">{eventType.description}</p>
-                            </div>
-                            {isAlreadyAdded && (
-                              <span className="text-xs text-gray-500">Já adicionado</span>
-                            )}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))
-              })()}
+
+              <div className="p-6">
+                <EventSelector
+                  availableEvents={eventTypes}
+                  onChange={(eventKey) => {
+                    addTrigger(eventKey)
+                    setShowEventSelector(false)
+                    setEventSearchQuery('')
+                  }}
+                  excludeEvents={currentRule.triggers ? currentRule.triggers.map(t => t.event) : []}
+                  placeholder="Selecionar tipo de evento..."
+                  className="w-full"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -567,7 +534,7 @@ export function ModularRuleBuilder({
             <Zap className="w-5 h-5" />
             Configuração de Triggers
           </h3>
-          {currentRule.triggers.length > 1 && (
+          {currentRule.triggers && currentRule.triggers.length > 1 && (
             <div className="flex items-center gap-2 px-3 py-1 bg-blue-100 rounded-full">
               <Layers size={16} className="text-blue-600" />
               <span className="text-sm font-medium text-blue-800">
@@ -579,7 +546,7 @@ export function ModularRuleBuilder({
 
         {/* Trigger Cards */}
         <div className="space-y-3">
-          {currentRule.triggers.map((trigger, index) => {
+          {currentRule.triggers && currentRule.triggers.map((trigger, index) => {
               
               const triggerEvent = eventTypes.find(et => et.key === trigger.event)
               if (!triggerEvent) return null
@@ -596,8 +563,15 @@ export function ModularRuleBuilder({
                   }}
                   onDelete={() => removeTrigger(index)}
                   index={index}
-                  totalTriggers={currentRule.triggers.length}
+                  totalTriggers={currentRule.triggers ? currentRule.triggers.length : 0}
                   availableFields={triggerEvent.fields || []}
+                  availableEvents={eventTypes}
+                  onEventChange={(newEventKey) => {
+                    const newTriggers = [...currentRule.triggers]
+                    newTriggers[index] = { ...trigger, event: newEventKey }
+                    setCurrentRule({ ...currentRule, triggers: newTriggers })
+                  }}
+                  excludeEvents={currentRule.triggers ? currentRule.triggers.filter((_, i) => i !== index).map(t => t.event) : []}
                 />
               )
           })}
@@ -613,7 +587,7 @@ export function ModularRuleBuilder({
         </div>
 
         {/* Cross-sell Mission Logic */}
-        {currentRule.triggers.length > 1 && (
+        {currentRule.triggers && currentRule.triggers.length > 1 && (
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-sm font-semibold text-gray-900">Lógica entre Triggers</h4>
@@ -658,43 +632,93 @@ export function ModularRuleBuilder({
           )}
       </div>
 
-      {/* Rule Conditions */}
-      {currentRule.triggers.length > 0 ? (
+      {/* Business Rules Section - DRAMATICALLY SIMPLIFIED */}
+      {currentRule.triggers && currentRule.triggers.length > 0 && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="flex items-center gap-2 text-xl font-semibold text-gray-900">
-              <span>🎯</span>
-              Condições da Regra
-            </h3>
-            <div className="px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-full border border-blue-200">
-              Modo Avançado
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="flex items-center gap-2 text-lg font-semibold text-orange-900">
+                <span>🏢</span>
+                Regras de Negócio Externas
+              </h3>
+              <div className="px-3 py-1 bg-orange-200 text-orange-800 text-xs rounded-full font-medium">
+                Raramente Usado
+              </div>
+            </div>
+
+            <div className="text-sm text-orange-800 space-y-2 mb-4">
+              <p><strong>🤔 Quando usar esta seção?</strong></p>
+              <div className="text-xs space-y-1 ml-4">
+                <p>• ✅ Verificar tier do usuário (VIP, Bronze, etc.)</p>
+                <p>• ✅ Validar idade da conta (cadastro há 30+ dias)</p>
+                <p>• ✅ Checar KYC/verificação de identidade</p>
+                <p>• ✅ Aplicar limites regionais/temporários</p>
+                <p className="text-orange-900 font-medium">• ❌ NÃO para filtros de eventos (valor, esporte, etc.) - isso vai no trigger!</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  const showAdvanced = !document.getElementById('advanced-rules')?.classList.contains('hidden')
+                  const element = document.getElementById('advanced-rules')
+                  if (element) {
+                    element.classList.toggle('hidden', showAdvanced)
+                  }
+                }}
+                className="px-4 py-2 bg-orange-600 text-white rounded text-sm hover:bg-orange-700 transition-colors"
+              >
+                🔧 Mostrar/Ocultar Regras Avançadas
+              </button>
+              <span className="text-xs text-orange-700">
+                Na maioria dos casos, você não precisa desta seção
+              </span>
             </div>
           </div>
-          
-          <AdvancedConditionBuilder
-            initialConditionTree={currentRule.conditionTree}
-            availableFields={availableFields}
-            availableFieldsGrouped={availableFieldsGrouped}
-            onChange={handleAdvancedConditionChange}
-            className="bg-gray-50 rounded-lg p-4"
-          />
-        </div>
-      ) : currentRule.triggers.length === 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-yellow-600">⚠️</span>
-            <h3 className="text-lg font-semibold text-yellow-800 m-0">Selecione Eventos</h3>
+
+          <div id="advanced-rules" className="hidden">
+            <AdvancedConditionBuilder
+              initialConditionTree={currentRule.conditionTree}
+              availableFields={availableFields}
+              availableFieldsGrouped={availableFieldsGrouped}
+              onChange={handleAdvancedConditionChange}
+              className="bg-gray-50 rounded-lg p-4 border-2 border-orange-200"
+              placeholder="Validações de usuário/sistema: user_tier == 'vip', account_age >= 30, region == 'BR'"
+              triggers={currentRule.triggers}
+              triggerLogic={currentRule.logic}
+            />
           </div>
-          <p className="text-sm text-yellow-700 m-0">
-            Para configurar condições, primeiro selecione um ou mais eventos disparadores acima.
-            <br />
-            <strong>Dica:</strong> Você pode selecionar múltiplos eventos para criar missões cross-sell!
-          </p>
+        </div>
+      )}
+
+      {(!currentRule.triggers || currentRule.triggers.length === 0) && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-blue-600">💡</span>
+            <h3 className="text-lg font-semibold text-blue-800 m-0">Comece Adicionando Triggers</h3>
+          </div>
+          <div className="text-sm text-blue-700 space-y-2">
+            <p className="m-0">
+              <strong>1. Adicione triggers</strong> - Defina quais eventos monitorar (apostas, depósitos, etc.)
+            </p>
+            <p className="m-0">
+              <strong>2. Configure filtros</strong> - Cada trigger pode ter filtros específicos (valor, esporte, método)
+            </p>
+            <p className="m-0">
+              <strong>3. Escolha lógica</strong> - Para múltiplos triggers, defina se é AND (todos) ou OR (qualquer um)
+            </p>
+            <div className="mt-3 p-2 bg-blue-100 rounded">
+              <p className="text-xs text-blue-800 m-0">
+                ✨ <strong>Nova Arquitetura:</strong> Agora todos os filtros ficam nos triggers!
+                Não há mais confusão entre triggers e condições.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Advanced Rule Settings */}
-      {currentRule.triggers.length > 0 && (
+      {currentRule.triggers && currentRule.triggers.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <h3 className="flex items-center gap-2 text-xl font-semibold text-gray-900">
@@ -808,7 +832,7 @@ export function ModularRuleBuilder({
       )}
 
       {/* Rule Summary */}
-      {currentRule.triggers.length > 0 && currentRule.conditions.length > 0 && (
+      {currentRule.triggers && currentRule.triggers.length > 0 && currentRule.conditions.length > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-3">
             <span>📝</span>
@@ -816,14 +840,14 @@ export function ModularRuleBuilder({
           </h3>
           <div className="space-y-2">
             <p className="text-sm text-gray-700 m-0">
-              <strong className="text-gray-900">Quando:</strong> {currentRule.triggers.map(t => {
+              <strong className="text-gray-900">Quando:</strong> {currentRule.triggers && currentRule.triggers.map(t => {
                 const event = eventTypes.find(e => e.key === t.event)
                 return event?.label || t.event
-              }).join(currentRule.triggers.length > 1 ? ` ${triggerLogic} ` : '')}
+              }).join(currentRule.triggers && currentRule.triggers.length > 1 ? ` ${triggerLogic} ` : '')}
             </p>
             <p className="text-sm text-gray-700 m-0">
-              <strong className="text-gray-900">Triggers:</strong> {currentRule.triggers.length} trigger(s)
-              {currentRule.triggers.length > 1 && (
+              <strong className="text-gray-900">Triggers:</strong> {currentRule.triggers ? currentRule.triggers.length : 0} trigger(s)
+              {currentRule.triggers && currentRule.triggers.length > 1 && (
                 <span className="text-blue-600 font-medium"> [{triggerLogic}]</span>
               )}
               {currentRule.triggers[0]?.debounce && (
@@ -857,10 +881,12 @@ export function ModularRuleBuilder({
       )}
 
       {/* Mission Preview - Enhanced Validation */}
-      {currentRule.triggers.length > 0 && (
+      {currentRule.triggers && currentRule.triggers.length > 0 && (
         <MissionPreview
           rule={currentRule}
           eventTypes={eventTypes}
+          availableFields={availableFields}
+          availableFieldsGrouped={availableFieldsGrouped}
           className="mt-6"
         />
       )}

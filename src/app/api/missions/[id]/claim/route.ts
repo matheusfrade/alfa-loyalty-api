@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
+import { tierService } from '@/modules/tiers/services'
+import { checkAndUpgradeTiers } from '@/lib/tier-rewards'
 
 export async function POST(
   request: NextRequest,
@@ -142,51 +144,42 @@ export async function POST(
           userId,
           type: 'MISSION_COMPLETE',
           title: 'Mission Completed!',
-          message: `You completed "${mission.title}" and earned ${coinsReward} coins!`,
+          message: `You completed "${mission.title}" and earned ${coinsReward} coins${mission.xpReward > 0 ? `, ${mission.xpReward} XP` : ''}${mission.tierPointsReward > 0 ? `, and ${mission.tierPointsReward} tier points` : ''}!`,
           data: JSON.stringify({
             missionId,
             coinsReward,
             xpReward: mission.xpReward,
+            tierPointsReward: mission.tierPointsReward,
           }),
         },
       })
 
-      // Check tier upgrade
-      const tiers = await tx.tier.findMany({
-        where: { programId: mission.programId },
-        orderBy: { level: 'asc' },
-      })
+      // No tier check here - will be done outside transaction
 
-      const nextTier = tiers.find(t => t.requiredXP <= newXP && t.level > (userProgram.tier?.level || 0))
-      
-      if (nextTier) {
-        await tx.userProgram.update({
-          where: { id: userProgram.id },
-          data: { tierId: nextTier.id },
-        })
-
-        await tx.notification.create({
-          data: {
-            userId,
-            type: 'TIER_UPGRADE',
-            title: 'Tier Upgrade!',
-            message: `Congratulations! You've reached ${nextTier.name} tier!`,
-            data: JSON.stringify({
-              newTier: nextTier,
-              previousTier: userProgram.tier,
-            }),
-          },
+      // Award tier points if mission has tierPointsReward
+      if (mission.tierPointsReward > 0) {
+        await tierService.addPoints({
+          playerId: userId,
+          programId: mission.programId,
+          amount: mission.tierPointsReward,
+          source: 'MISSION',
+          reference: missionId,
+          description: `Mission completed: ${mission.title}`
         })
       }
     })
+
+    // Check for tier upgrades and deliver rewards after transaction
+    await checkAndUpgradeTiers(userId, mission.programId)
 
     return NextResponse.json({
       success: true,
       rewards: {
         coins: coinsReward,
         xp: mission.xpReward,
+        tierPoints: mission.tierPointsReward
       },
-      message: `Mission completed! You earned ${coinsReward} coins and ${mission.xpReward} XP.`,
+      message: `Mission completed! You earned ${coinsReward} coins, ${mission.xpReward} XP${mission.tierPointsReward > 0 ? `, and ${mission.tierPointsReward} tier points` : ''}.`,
     })
   } catch (error) {
     console.error('Claim mission error:', error)

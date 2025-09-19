@@ -38,63 +38,44 @@ export default function AnalyticsPage() {
 
   const loadAnalytics = async () => {
     try {
-      // Mock data since we don't have the analytics API yet
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      const mockData: AnalyticsData = {
-        overview: {
-          totalUsers: 1247,
-          activeUsers: 892,
-          totalCoinsEarned: 245750,
-          totalCoinsSpent: 156200,
-          missionCompletions: 3456,
-          rewardRedemptions: 678,
-          averageSessionTime: 18.5,
-          churnRate: 12.3,
-        },
-        growth: {
-          newUsers: Array.from({ length: 30 }, (_, i) => ({
-            date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            count: Math.floor(Math.random() * 20) + 5
-          })),
-          coinsEarned: Array.from({ length: 30 }, (_, i) => ({
-            date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            amount: Math.floor(Math.random() * 5000) + 2000
-          })),
-          redemptions: Array.from({ length: 30 }, (_, i) => ({
-            date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            count: Math.floor(Math.random() * 30) + 10
-          })),
-        },
-        engagement: {
-          topMissions: [
-            { name: 'Daily Login', completions: 1245, category: 'DAILY' },
-            { name: 'First Bet', completions: 892, category: 'BETTING' },
-            { name: 'KYC Complete', completions: 567, category: 'TUTORIAL' },
-            { name: 'Weekly Challenge', completions: 334, category: 'WEEKLY' },
-            { name: 'High Roller', completions: 123, category: 'SPECIAL' },
-          ],
-          topRewards: [
-            { name: 'Free Bet R$ 50', redemptions: 234, category: 'BONUS' },
-            { name: '100 Free Spins', redemptions: 189, category: 'FREESPINS' },
-            { name: 'Cashback 10%', redemptions: 145, category: 'CASHBACK' },
-            { name: 'Credit R$ 100', redemptions: 98, category: 'CREDITS' },
-            { name: 'VIP Support', redemptions: 45, category: 'PREMIUM' },
-          ],
-          tierDistribution: [
-            { tier: 'Iniciante', count: 456, percentage: 36.6 },
-            { tier: 'Bronze', count: 312, percentage: 25.0 },
-            { tier: 'Prata', count: 234, percentage: 18.8 },
-            { tier: 'Ouro', count: 156, percentage: 12.5 },
-            { tier: 'Diamante', count: 67, percentage: 5.4 },
-            { tier: 'VIP', count: 22, percentage: 1.8 },
-          ],
-        },
+      const response = await fetch('/api/admin/analytics')
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch analytics data')
       }
-      
-      setData(mockData)
+
+      const result = await response.json()
+
+      if (result.success) {
+        setData(result.data)
+      } else {
+        throw new Error(result.error)
+      }
     } catch (error) {
       console.error('Failed to load analytics:', error)
+      // Fallback to basic data structure if API fails
+      setData({
+        overview: {
+          totalUsers: 0,
+          activeUsers: 0,
+          totalCoinsEarned: 0,
+          totalCoinsSpent: 0,
+          missionCompletions: 0,
+          rewardRedemptions: 0,
+          averageSessionTime: 0,
+          churnRate: 0,
+        },
+        growth: {
+          newUsers: [],
+          coinsEarned: [],
+          redemptions: [],
+        },
+        engagement: {
+          topMissions: [],
+          topRewards: [],
+          tierDistribution: [],
+        },
+      })
     } finally {
       setLoading(false)
     }
