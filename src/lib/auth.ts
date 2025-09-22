@@ -1,10 +1,6 @@
-import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
-
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'dev-secret-key-12345-change-in-production'
-)
+import { signToken, verifyToken } from './auth-edge'
 
 export async function hashPassword(password: string) {
   return bcrypt.hash(password, 10)
@@ -14,24 +10,8 @@ export async function comparePasswords(password: string, hash: string) {
   return bcrypt.compare(password, hash)
 }
 
-export async function signToken(payload: any) {
-  const token = await new SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('24h')
-    .sign(secret)
-  
-  return token
-}
-
-export async function verifyToken(token: string) {
-  try {
-    const { payload } = await jwtVerify(token, secret)
-    return payload
-  } catch (error) {
-    return null
-  }
-}
+// Re-export JWT functions for compatibility
+export { signToken, verifyToken } from './auth-edge'
 
 export async function getSession() {
   const cookieStore = cookies()
