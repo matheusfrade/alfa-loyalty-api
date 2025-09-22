@@ -18,172 +18,152 @@ model Program {
   slug        String      @unique
   description String?
   type        String @default("GAMING")
-
-  // Configuration
+  config      String      @default("{}") // JSON as string for PostgreSQL
+  branding    String      @default("{}") // JSON as string for PostgreSQL
   isActive    Boolean     @default(true)
-
-  // Timestamps
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  // Relations
-  users       UserProgram[]
-  missions    Mission[]
-  rewards     Product[]
-  tiers       Tier[]
-  tierPrograms TierProgram?
-
-  @@map("programs")
+  missions         Mission[]
+  products         Product[]
+  tiers            Tier[]
+  users            UserProgram[]
+  events           Event[]
+  transactions     Transaction[]
+  analytics        Analytics[]
+  periodPolicy     PeriodPolicy?
+  pointsLedger     PlayerPointsLedger[]
+  tierProgress     PlayerTierProgress[]
+  tierJobs         TierJob[]
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  role      String   @default("USER") // USER, ADMIN
-  isActive  Boolean  @default(true)
+  id           String   @id @default(cuid())
+  externalId   String?  @unique // ID from external system
+  email        String   @unique
+  password     String
+  name         String
+  avatar       String?
+  isAdmin      Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  programs        UserProgram[]
-  missionClaims   MissionClaim[]
-  redemptions     Redemption[]
-  pointsLedger    PlayerPointsLedger[]
+  programs         UserProgram[]
+  missions         UserMission[]
+  redemptions      Redemption[]
+  transactions     Transaction[]
+  events           Event[]
+  notifications    Notification[]
+  pointsLedger     PlayerPointsLedger[]
+  tierProgress     PlayerTierProgress[]
   tierRewardUsages TierRewardUsage[]
-
-  @@map("users")
 }
 
 model UserProgram {
-  id        String @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   programId String
+  coins     Int       @default(0)
+  xp        Int       @default(0)
+  tierId    String?
+  joinedAt  DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-  // Player Stats
-  totalPoints    Int @default(0)
-  availableCoins Int @default(0)
-
-  // XP and Tier System
-  xp           Int     @default(0)
-  tierId       String?
-  currentLevel Int     @default(1)
-
-  // Metadata
-  joinedAt     DateTime @default(now())
-  lastActiveAt DateTime @default(now())
-
-  // Relations
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
-  tier    Tier?   @relation(fields: [tierId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program   Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  tier      Tier?     @relation(fields: [tierId], references: [id])
 
   @@unique([userId, programId])
-  @@map("user_programs")
 }
 
-// ==================== MISSIONS SYSTEM ====================
+// ==================== MISSIONS ====================
 
 model Mission {
-  id          String   @id @default(cuid())
-  programId   String
-  name        String
-  description String
-  icon        String   @default("🎯")
+  id           String           @id @default(cuid())
+  programId    String
+  title        String
+  description  String
+  category     String
+  type         String      @default("SINGLE")
+  icon         String?
+  reward       Int              @default(0) // coins
+  xpReward     Int              @default(0)
+  tierPointsReward Int          @default(0) // tier points
+  requirement  String           @default("{}") // JSON as string
+  maxClaims    Int?
+  startDate    DateTime?
+  endDate      DateTime?
+  tierRequired String?
+  isActive     Boolean          @default(true)
+  order        Int              @default(0)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
-  // Mission Configuration
-  type        String   @default("RECURRING") // RECURRING, ONE_TIME, SEASONAL
-  category    String   @default("GENERAL")
-
-  // Rewards
-  reward      Int      @default(0) // Points reward
-  xpReward    Int      @default(0) // XP reward
-  tierPointsReward Int @default(0) // Tier points reward
-
-  // Requirements & Rules (JSON)
-  requirement String   // JSON string with mission logic
-
-  // Constraints
-  maxClaims   Int?     // Max number of claims per user
-
-  // Schedule
-  startDate   DateTime?
-  endDate     DateTime?
-
-  // Status
-  isActive    Boolean  @default(true)
-
-  // Timestamps
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
-  claims  MissionClaim[]
-
-  @@map("missions")
+  program      Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  tier         Tier?            @relation(fields: [tierRequired], references: [id])
+  userMissions UserMission[]
+  productRewards MissionProduct[]
 }
 
-model MissionClaim {
-  id        String   @id @default(cuid())
-  userId    String
-  missionId String
+model UserMission {
+  id          String          @id @default(cuid())
+  userId      String
+  missionId   String
+  status      String   @default("ACTIVE")
+  progress    Int             @default(0)
+  claimCount  Int             @default(0)
+  startedAt   DateTime        @default(now())
+  completedAt DateTime?
+  claimedAt   DateTime?
+  metadata    String          @default("{}") // JSON as string
 
-  // Claim details
-  pointsAwarded    Int      @default(0)
-  xpAwarded        Int      @default(0)
-  tierPointsAwarded Int     @default(0)
-
-  // Metadata
-  claimedAt DateTime @default(now())
-  metadata  String   @default("{}") // JSON metadata about the claim
-
-  // Relations
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission     Mission         @relation(fields: [missionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, missionId])
-  @@map("mission_claims")
 }
 
-// ==================== REWARDS SYSTEM ====================
+// Relation table for Mission rewards
+model MissionProduct {
+  missionId String
+  productId String
+  quantity  Int      @default(1)
+
+  mission   Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([missionId, productId])
+}
+
+// ==================== REWARDS & PRODUCTS ====================
 
 model Product {
-  id          String @id @default(cuid())
-  programId   String
-  name        String
-  description String
-  image       String?
+  id              String           @id @default(cuid())
+  programId       String
+  name            String
+  description     String
+  category        String
+  price           Int              // in coins
+  image           String?
+  stock           Int?             // null = unlimited
+  tierRequired    String?
+  validFrom       DateTime?
+  validUntil      DateTime?
+  deliveryType    String     @default("AUTOMATIC")
+  metadata        String           @default("{}") // JSON as string
+  isActive        Boolean          @default(true)
+  isShopVisible   Boolean          @default(true) // true = visible in user shop, false = system only
+  order           Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
-  // Pricing
-  price       Int     // Cost in points
-
-  // Product details
-  category    String  @default("GENERAL")
-  type        String  @default("DIGITAL") // DIGITAL, PHYSICAL, VOUCHER
-
-  // Inventory
-  stock       Int?    // null = unlimited
-
-  // Delivery configuration (JSON)
-  delivery    String  @default("{}")
-
-  // Status
-  isActive        Boolean @default(true)
-  isShopVisible   Boolean @default(true)
-
-  // Timestamps
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  program     Program @relation(fields: [programId], references: [id], onDelete: Cascade)
-  redemptions Redemption[]
-  tierRewards TierReward[]
-
-  @@map("products")
+  program         Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  tier            Tier?            @relation(fields: [tierRequired], references: [id])
+  redemptions     Redemption[]
+  missionRewards  MissionProduct[]
+  tierRewards     TierReward[]
 }
 
 model Redemption {
@@ -201,116 +181,208 @@ model Redemption {
   user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   product      Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
   tierRewardUsages TierRewardUsage[]
-
-  @@map("redemptions")
 }
 
-// ==================== TIER SYSTEM ====================
+// ==================== TIERS ====================
 
 model Tier {
-  id          String  @id @default(cuid())
-  programId   String
-  name        String
-  level       Int     // 1, 2, 3, etc.
-  requiredXP  Int     // XP required to reach this tier
+  id               String   @id @default(cuid())
+  programId        String
+  name             String
+  level            Int      // 0, 1, 2, 3, 4, 5
+  requiredXP       Int      // Mantido para compatibilidade
+  minPoints        Int?     // Pontos mínimos para o tier
+  maxPoints        Int?     // Pontos máximos (null = sem limite)
+  maintenancePoints Int?    // Pontos necessários para manter o tier
+  color            String
+  icon             String?
+  multiplier       Float    @default(1.0) // coin multiplier
+  benefits         String   @default("[]") // JSON array as string
+  isInviteOnly     Boolean  @default(false) // Tier apenas por convite
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  // Tier configuration
-  color       String  @default("#000000")
-  icon        String  @default("⭐")
-  description String?
-
-  // Tier benefits configuration
-  benefits    String  @default("{}") // JSON with tier benefits
-
-  // Point multipliers
-  pointMultiplier     Float @default(1.0) // Points multiplier for this tier
-  tierPointMultiplier Float @default(1.0) // Tier points multiplier
-
-  // Tier boundaries (for complex tier rules)
-  minPoints   Int?
-  maxPoints   Int?
-
-  // Meta configuration
-  isDefault   Boolean @default(false)
-  isActive    Boolean @default(true)
-  isVip       Boolean @default(false)
-  isInviteOnly Boolean @default(false)
-
-  // Timestamps
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  program     Program     @relation(fields: [programId], references: [id], onDelete: Cascade)
-  users       UserProgram[]
-  rewards     TierReward[]
+  program          Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
+  users            UserProgram[]
+  missions         Mission[]
+  products         Product[]
+  tierProgress     PlayerTierProgress[]
+  tierRewards      TierReward[]
 
   @@unique([programId, level])
-  @@map("tiers")
 }
 
-model TierProgram {
-  id                    String @id @default(cuid())
-  programId             String @unique
+// Políticas de período e expiração
+model PeriodPolicy {
+  id                  String   @id @default(cuid())
+  programId           String   @unique
+  periodType          String   @default("SEMESTRE") // SEMESTRE, TRIMESTRE, ANO
+  pointsExpireAfterM  Int      @default(12) // Meses para expirar pontos
+  softResetFactor     Float    @default(0.5) // Fator de carry-over (0.0 a 1.0)
+  reviewCron          String   @default("0 0 1 1,7 *") // Cron para fechamento
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  // Tier Point Configuration
-  pointsExpireAfterDays Int    @default(365)
-  softResetEnabled      Boolean @default(false)
-  softResetFactor       Float   @default(0.5)
-
-  // VIP Configuration
-  vipInflationThreshold Int     @default(12) // Percentage threshold for VIP inflation alert
-
-  // Period Configuration
-  periodType            String  @default("MONTH") // MONTH, QUARTER, SEMESTER, YEAR
-  periodStartDay        Int     @default(1)  // Day of period start
-  periodStartMonth      Int?    // Month of period start (for YEAR periods)
-
-  // Automation
-  autoUpgrade           Boolean @default(true)
-  autoDowngrade         Boolean @default(false)
-
-  // Timestamps
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  // Relations
-  program               Program @relation(fields: [programId], references: [id], onDelete: Cascade)
-
-  @@map("tier_programs")
+  program             Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
 }
 
-model TierReward {
-  id          String @id @default(cuid())
-  tierId      String
-  productId   String
+// Ledger de pontos com expiração
+model PlayerPointsLedger {
+  id          String    @id @default(cuid())
+  playerId    String    // userId
+  programId   String
+  source      String    // MISSION, BONUS, ADJUSTMENT, etc
+  amount      Int       // Positivo ou negativo
+  balance     Int       // Saldo após esta transação
+  reference   String?   // ID da missão, transação, etc
+  description String
+  occurredAt  DateTime  @default(now())
+  expiresAt   DateTime? // Data de expiração
+  isExpired   Boolean   @default(false)
+  meta        String    @default("{}") // JSON metadata
+  createdAt   DateTime  @default(now())
 
-  // Reward configuration
-  rewardType  String @default("AUTOMATIC") // AUTOMATIC, CLAIMABLE
-  triggerType String @default("TIER_REACH") // TIER_REACH, TIER_MAINTAIN, PERIOD_END
+  player      User      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  program     Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
 
-  // Quota system
-  quotaType   String @default("UNLIMITED") // UNLIMITED, DAILY, WEEKLY, MONTHLY, TIER_PERIOD
-  quotaLimit  Int?   // Max number of times this reward can be claimed
+  @@index([playerId, programId, expiresAt])
+  @@index([expiresAt, isExpired])
+}
 
-  // Delivery timing
-  deliveryDelay Int @default(0) // Delay in seconds before delivery
+// Progresso do jogador por período
+model PlayerTierProgress {
+  id           String    @id @default(cuid())
+  playerId     String    // userId
+  programId    String
+  tierId       String
+  periodStart  DateTime
+  periodEnd    DateTime
+  pointsEarned Int       @default(0) // Pontos ganhos no período
+  pointsCarry  Int       @default(0) // Pontos carregados do período anterior
+  isCurrent    Boolean   @default(true) // Se é o período atual
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  // Status
-  isActive    Boolean @default(true)
+  player       User      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  program      Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  tier         Tier      @relation(fields: [tierId], references: [id], onDelete: Cascade)
 
-  // Timestamps
+  @@unique([playerId, programId, periodStart])
+  @@index([playerId, programId, isCurrent])
+}
+
+// Controle de jobs executados
+model TierJob {
+  id          String    @id @default(cuid())
+  type        String    // EXPIRE_POINTS, CLOSE_PERIOD, CALCULATE_METRICS
+  programId   String?   // null = todos os programas
+  status      String    @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
+  startedAt   DateTime?
+  completedAt DateTime?
+  result      String    @default("{}") // JSON result
+  error       String?
+  metadata    String    @default("{}") // JSON metadata
+  createdAt   DateTime  @default(now())
+
+  program     Program?  @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@index([type, status, createdAt])
+}
+
+// ==================== TRANSACTIONS & EVENTS ====================
+
+model Transaction {
+  id          String           @id @default(cuid())
+  userId      String
+  programId   String
+  type        String
+  amount      Int              // positive or negative
+  balance     Int              // balance after transaction
+  reference   String?          // reference to mission/redemption/etc
+  description String
+  metadata    String           @default("{}") // JSON as string
+  createdAt   DateTime         @default(now())
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program     Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  programId   String
+  userId      String
+  type        String   // flexible event type
+  data        String   @default("{}") // JSON as string
+  processed   Boolean  @default(false)
+  processedAt DateTime?
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
-  // Relations
-  tier        Tier @relation(fields: [tierId], references: [id], onDelete: Cascade)
-  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  usages      TierRewardUsage[]
-
-  @@map("tier_rewards")
+  program     Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// ==================== NOTIFICATIONS ====================
+
+model Notification {
+  id         String            @id @default(cuid())
+  userId     String
+  type       String
+  title      String
+  message    String
+  data       String            @default("{}") // JSON as string
+  isRead     Boolean           @default(false)
+  readAt     DateTime?
+  createdAt  DateTime          @default(now())
+
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ==================== ANALYTICS ====================
+
+model Analytics {
+  id          String   @id @default(cuid())
+  programId   String
+  date        DateTime @default(now())
+  metric      String
+  value       Float
+  dimensions  String   @default("{}") // JSON as string
+  createdAt   DateTime @default(now())
+
+  program     Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@index([programId, date, metric])
+}
+
+// ==================== TIER REWARDS ====================
+
+// Sistema de recompensas por tier
+model TierReward {
+  id           String   @id @default(cuid())
+  tierId       String
+  productId    String
+  rewardType   String   // WELCOME, RECURRING, MILESTONE, EXCLUSIVE
+  quotaType    String   // DAILY, WEEKLY, MONTHLY, PER_TIER, UNLIMITED
+  quotaLimit   Int?     // null = unlimited
+  quotaPeriod  String?  // Para quotas personalizadas (ex: "30 days")
+  autoDeliver  Boolean  @default(true)
+  isActive     Boolean  @default(true)
+  description  String?  // Descrição custom do reward
+  metadata     String   @default("{}") // JSON metadata
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tier         Tier     @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  usages       TierRewardUsage[]
+
+  @@unique([tierId, productId, rewardType])
+  @@index([tierId, isActive])
+  @@index([rewardType, quotaType])
+}
+
+// Controle de uso de tier rewards
 model TierRewardUsage {
   id            String   @id @default(cuid())
   userId        String
@@ -322,40 +394,34 @@ model TierRewardUsage {
   metadata      String   @default("{}") // JSON metadata
   createdAt     DateTime @default(now())
 
-  // Relations
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tierReward   TierReward  @relation(fields: [tierRewardId], references: [id], onDelete: Cascade)
-  redemption   Redemption? @relation(fields: [redemptionId], references: [id])
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tierReward    TierReward  @relation(fields: [tierRewardId], references: [id], onDelete: Cascade)
+  redemption    Redemption? @relation(fields: [redemptionId], references: [id])
 
-  @@map("tier_reward_usages")
+  @@unique([userId, tierRewardId, period])
+  @@index([userId, tierRewardId])
+  @@index([period, createdAt])
 }
 
-// ==================== POINTS LEDGER ====================
+// ==================== ENUMS (as TypeScript types) ====================
+// Note: PostgreSQL supports native enums, but we use strings with TypeScript validation for flexibility
 
-model PlayerPointsLedger {
-  id          String   @id @default(cuid())
-  userId      String
-  programId   String
+// ProgramType: GAMING | ECOMMERCE | RETAIL | SAAS | EDUCATION | CUSTOM
+// MissionCategory: LOGIN | BETTING | DEPOSIT | TUTORIAL | SPECIAL | DAILY | WEEKLY | MONTHLY | ACHIEVEMENT
+// MissionType: SINGLE | RECURRING | STREAK | MILESTONE
+// MissionStatus: ACTIVE | COMPLETED | CLAIMED | EXPIRED
+// ProductCategory: BONUS | CASHBACK | FREESPINS | PHYSICAL | EXPERIENCE | CREDITS | PREMIUM | DISCOUNT | VOUCHER
+// DeliveryType: AUTOMATIC | CODE | PHYSICAL | MANUAL
+// RedemptionStatus: PENDING | PROCESSING | COMPLETED | CANCELLED | EXPIRED | FAILED
+// TransactionType: EARNED | SPENT | BONUS | ADJUSTMENT | EXPIRED | REFUND
+// NotificationType: MISSION_COMPLETE | REWARD_AVAILABLE | TIER_UPGRADE | COINS_EARNED | PRODUCT_REDEEMED | GENERAL
 
-  // Transaction details
-  type        String   // EARNED, SPENT, EXPIRED, ADJUSTED, TIER_POINTS
-  amount      Int      // Can be negative for debits
-  source      String   // MISSION, MANUAL, REDEMPTION, etc.
-  sourceId    String?  // ID of the source (missionId, redemptionId, etc.)
+// Tiers System Enums:
+// PeriodType: SEMESTRE | TRIMESTRE | ANO
+// PointsSource: MISSION | BONUS | ADJUSTMENT | PURCHASE | REFERRAL | MANUAL | PROMOTION
+// TierJobType: EXPIRE_POINTS | CLOSE_PERIOD | CALCULATE_METRICS | TIER_RECALCULATION
+// TierJobStatus: PENDING | RUNNING | COMPLETED | FAILED | CANCELLED
 
-  // Expiration (for earned points)
-  expiresAt   DateTime?
-  isExpired   Boolean   @default(false)
-
-  // Metadata
-  description String?
-  metadata    String    @default("{}")
-
-  // Timestamps
-  createdAt   DateTime  @default(now())
-
-  // Relations
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("player_points_ledger")
-}
+// Tier Rewards Enums:
+// TierRewardType: WELCOME | RECURRING | MILESTONE | EXCLUSIVE
+// TierRewardQuotaType: DAILY | WEEKLY | MONTHLY | PER_TIER | UNLIMITED
