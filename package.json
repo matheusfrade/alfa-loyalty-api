@@ -4,8 +4,8 @@
   "description": "Generic loyalty platform API with admin panel",
   "scripts": {
     "dev": "next dev --port 3005",
-    "build": "prisma generate && next build",
-    "postinstall": "prisma generate",
+    "build": "if [ \"$NODE_ENV\" = \"production\" ]; then cp prisma/schema.production.prisma prisma/schema.prisma; fi && prisma generate && next build",
+    "postinstall": "if [ \"$NODE_ENV\" = \"production\" ]; then cp prisma/schema.production.prisma prisma/schema.prisma; fi && prisma generate",
     "start": "if [ -n \"$DATABASE_URL\" ]; then npx prisma generate && npx prisma db push --accept-data-loss && npx prisma db seed; fi && next start",
     "lint": "next lint",
     "test:triggers": "echo 'Abra http://localhost:3005/admin/missions em seu navegador, abra DevTools (F12), e execute: fetch(\"/tests/trigger-validation-test.js\").then(r => r.text()).then(eval)'",

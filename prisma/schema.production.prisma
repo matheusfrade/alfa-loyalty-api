@@ -1,0 +1,361 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== CORE MODELS ====================
+
+model Program {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?
+  type        String @default("GAMING")
+
+  // Configuration
+  isActive    Boolean     @default(true)
+
+  // Timestamps
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  users       UserProgram[]
+  missions    Mission[]
+  rewards     Product[]
+  tiers       Tier[]
+  tierPrograms TierProgram?
+
+  @@map("programs")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("USER") // USER, ADMIN
+  isActive  Boolean  @default(true)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  programs        UserProgram[]
+  missionClaims   MissionClaim[]
+  redemptions     Redemption[]
+  pointsLedger    PlayerPointsLedger[]
+  tierRewardUsages TierRewardUsage[]
+
+  @@map("users")
+}
+
+model UserProgram {
+  id        String @id @default(cuid())
+  userId    String
+  programId String
+
+  // Player Stats
+  totalPoints    Int @default(0)
+  availableCoins Int @default(0)
+
+  // XP and Tier System
+  xp           Int     @default(0)
+  tierId       String?
+  currentLevel Int     @default(1)
+
+  // Metadata
+  joinedAt     DateTime @default(now())
+  lastActiveAt DateTime @default(now())
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  tier    Tier?   @relation(fields: [tierId], references: [id])
+
+  @@unique([userId, programId])
+  @@map("user_programs")
+}
+
+// ==================== MISSIONS SYSTEM ====================
+
+model Mission {
+  id          String   @id @default(cuid())
+  programId   String
+  name        String
+  description String
+  icon        String   @default("🎯")
+
+  // Mission Configuration
+  type        String   @default("RECURRING") // RECURRING, ONE_TIME, SEASONAL
+  category    String   @default("GENERAL")
+
+  // Rewards
+  reward      Int      @default(0) // Points reward
+  xpReward    Int      @default(0) // XP reward
+  tierPointsReward Int @default(0) // Tier points reward
+
+  // Requirements & Rules (JSON)
+  requirement String   // JSON string with mission logic
+
+  // Constraints
+  maxClaims   Int?     // Max number of claims per user
+
+  // Schedule
+  startDate   DateTime?
+  endDate     DateTime?
+
+  // Status
+  isActive    Boolean  @default(true)
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  claims  MissionClaim[]
+
+  @@map("missions")
+}
+
+model MissionClaim {
+  id        String   @id @default(cuid())
+  userId    String
+  missionId String
+
+  // Claim details
+  pointsAwarded    Int      @default(0)
+  xpAwarded        Int      @default(0)
+  tierPointsAwarded Int     @default(0)
+
+  // Metadata
+  claimedAt DateTime @default(now())
+  metadata  String   @default("{}") // JSON metadata about the claim
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, missionId])
+  @@map("mission_claims")
+}
+
+// ==================== REWARDS SYSTEM ====================
+
+model Product {
+  id          String @id @default(cuid())
+  programId   String
+  name        String
+  description String
+  image       String?
+
+  // Pricing
+  price       Int     // Cost in points
+
+  // Product details
+  category    String  @default("GENERAL")
+  type        String  @default("DIGITAL") // DIGITAL, PHYSICAL, VOUCHER
+
+  // Inventory
+  stock       Int?    // null = unlimited
+
+  // Delivery configuration (JSON)
+  delivery    String  @default("{}")
+
+  // Status
+  isActive        Boolean @default(true)
+  isShopVisible   Boolean @default(true)
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  program     Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  redemptions Redemption[]
+  tierRewards TierReward[]
+
+  @@map("products")
+}
+
+model Redemption {
+  id           String            @id @default(cuid())
+  userId       String
+  productId    String
+  status       String  @default("PENDING")
+  code         String?           @unique
+  deliveryInfo String?           // JSON as string
+  notes        String?
+  redeemedAt   DateTime          @default(now())
+  processedAt  DateTime?
+  deliveredAt  DateTime?
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product      Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tierRewardUsages TierRewardUsage[]
+
+  @@map("redemptions")
+}
+
+// ==================== TIER SYSTEM ====================
+
+model Tier {
+  id          String  @id @default(cuid())
+  programId   String
+  name        String
+  level       Int     // 1, 2, 3, etc.
+  requiredXP  Int     // XP required to reach this tier
+
+  // Tier configuration
+  color       String  @default("#000000")
+  icon        String  @default("⭐")
+  description String?
+
+  // Tier benefits configuration
+  benefits    String  @default("{}") // JSON with tier benefits
+
+  // Point multipliers
+  pointMultiplier     Float @default(1.0) // Points multiplier for this tier
+  tierPointMultiplier Float @default(1.0) // Tier points multiplier
+
+  // Tier boundaries (for complex tier rules)
+  minPoints   Int?
+  maxPoints   Int?
+
+  // Meta configuration
+  isDefault   Boolean @default(false)
+  isActive    Boolean @default(true)
+  isVip       Boolean @default(false)
+  isInviteOnly Boolean @default(false)
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  program     Program     @relation(fields: [programId], references: [id], onDelete: Cascade)
+  users       UserProgram[]
+  rewards     TierReward[]
+
+  @@unique([programId, level])
+  @@map("tiers")
+}
+
+model TierProgram {
+  id                    String @id @default(cuid())
+  programId             String @unique
+
+  // Tier Point Configuration
+  pointsExpireAfterDays Int    @default(365)
+  softResetEnabled      Boolean @default(false)
+  softResetFactor       Float   @default(0.5)
+
+  // VIP Configuration
+  vipInflationThreshold Int     @default(12) // Percentage threshold for VIP inflation alert
+
+  // Period Configuration
+  periodType            String  @default("MONTH") // MONTH, QUARTER, SEMESTER, YEAR
+  periodStartDay        Int     @default(1)  // Day of period start
+  periodStartMonth      Int?    // Month of period start (for YEAR periods)
+
+  // Automation
+  autoUpgrade           Boolean @default(true)
+  autoDowngrade         Boolean @default(false)
+
+  // Timestamps
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  program               Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@map("tier_programs")
+}
+
+model TierReward {
+  id          String @id @default(cuid())
+  tierId      String
+  productId   String
+
+  // Reward configuration
+  rewardType  String @default("AUTOMATIC") // AUTOMATIC, CLAIMABLE
+  triggerType String @default("TIER_REACH") // TIER_REACH, TIER_MAINTAIN, PERIOD_END
+
+  // Quota system
+  quotaType   String @default("UNLIMITED") // UNLIMITED, DAILY, WEEKLY, MONTHLY, TIER_PERIOD
+  quotaLimit  Int?   // Max number of times this reward can be claimed
+
+  // Delivery timing
+  deliveryDelay Int @default(0) // Delay in seconds before delivery
+
+  // Status
+  isActive    Boolean @default(true)
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  tier        Tier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  usages      TierRewardUsage[]
+
+  @@map("tier_rewards")
+}
+
+model TierRewardUsage {
+  id            String   @id @default(cuid())
+  userId        String
+  tierRewardId  String
+  usedAt        DateTime @default(now())
+  period        String   // "2024-01" (month), "2024-W01" (week), "2024-001" (day), "tier-period-123"
+  quantity      Int      @default(1)
+  redemptionId  String?  // Referência à redemption se aplicável
+  metadata      String   @default("{}") // JSON metadata
+  createdAt     DateTime @default(now())
+
+  // Relations
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tierReward   TierReward  @relation(fields: [tierRewardId], references: [id], onDelete: Cascade)
+  redemption   Redemption? @relation(fields: [redemptionId], references: [id])
+
+  @@map("tier_reward_usages")
+}
+
+// ==================== POINTS LEDGER ====================
+
+model PlayerPointsLedger {
+  id          String   @id @default(cuid())
+  userId      String
+  programId   String
+
+  // Transaction details
+  type        String   // EARNED, SPENT, EXPIRED, ADJUSTED, TIER_POINTS
+  amount      Int      // Can be negative for debits
+  source      String   // MISSION, MANUAL, REDEMPTION, etc.
+  sourceId    String?  // ID of the source (missionId, redemptionId, etc.)
+
+  // Expiration (for earned points)
+  expiresAt   DateTime?
+  isExpired   Boolean   @default(false)
+
+  // Metadata
+  description String?
+  metadata    String    @default("{}")
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("player_points_ledger")
+}
